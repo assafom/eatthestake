@@ -1,0 +1,62 @@
+.App {
+  text-align: center;
+  width: 1100px;
+  margin: auto;
+}
+
+.App-logo {
+  height: 40vmin;
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #09d3ac;
+}
+
+
+.center-elements {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.campaigns .card {
+  margin: 20px;
+  margin-bottom: auto;
+  text-align: left;
+  padding: 20px;
+  background: aliceblue;
+}
+
+.button-span button {
+  width: 100%;
+}
+
+.card-buy-tokens {
+  display: flex;
+}
+
+.card-buy-tokens div:nth-of-type(1) .form-control {
+  border-top-right-radius: 0px;
+  border-bottom-right-radius: 0px;
+}
+
+.card-buy-tokens div:nth-of-type(1) .form-control:focus {
+  border-color: none;
+  box-shadow: none;
+}
+
+.card-buy-tokens div:nth-of-type(2) .btn {
+  border-top-left-radius: 0px;
+  border-bottom-left-radius: 0px;
+}
