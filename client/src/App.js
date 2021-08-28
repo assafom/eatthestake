@@ -97,6 +97,7 @@ function App() {
 
   useEffect(() => {
     const load = async() => { 
+      await getUserDetails();
       await getTokensBalance();
       console.log(campaigns);
     }
@@ -251,6 +252,7 @@ function App() {
     const depositContract = new web3.eth.Contract(MockERC20Contract.abi, depositTokenAddr);
     const txResult = await depositContract.methods.approve(stakerContract.options.address, amount.toString()).send({ from: accounts[0] });
     const t = await stakerContract.methods.deposit(amount).send({ from: accounts[0] });
+    await getUserDetails();
     await getTokensBalance();
   }
 
@@ -281,6 +283,7 @@ function App() {
   async function withdraw(_amount) {
     let amount = web3.utils.toWei("10");
     const t = await stakerContract.methods.withdraw(amount).send({ from: accounts[0] });
+    await getUserDetails();
     await getTokensBalance();
   }
 
@@ -291,6 +294,7 @@ function App() {
     const rewardContract = new web3.eth.Contract(MockERC20Contract.abi, rewardTokenAddr);
     const txResult = await rewardContract.methods.approve(stakerContract.options.address, amount.toString()).send({ from: accounts[0] });
     const t = await stakerContract.methods.addRewards(amount, days).send({ from: accounts[0] });
+    await getUserDetails();
     await getTokensBalance();
   }
 

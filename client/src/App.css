@@ -42,7 +42,8 @@ body {
 
 .inner-container {
   /*color: black;*/
-  background-color: #33D3D2;
+  color: #33D3D2;
+  background-color: #212529;
   width: 50%;
   border-radius: 20px;
   font-size: 24px;
