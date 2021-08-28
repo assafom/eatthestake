@@ -39,8 +39,10 @@ contract Staker is Ownable {
     function addRewards(uint256 _rewardsAmount, uint256 _lengthInDays)
     external onlyOwner {
         require(block.timestamp > rewardPeriodEndTimestamp, "Staker: can't add rewards before period finished"); // TODO: might be not necessary, need to check
+        updateRewards();
         rewardPeriodEndTimestamp = block.timestamp.add(_lengthInDays.mul(24*60*60));
         rewardPerSecond = _rewardsAmount.mul(1e7).div(_lengthInDays).div(24*60*60);
+        //lastRewardTimestamp = block.timestamp;
         require(rewardToken.transferFrom(msg.sender, address(this), _rewardsAmount), "Staker: transfer failed");
     }
 

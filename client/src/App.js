@@ -184,8 +184,9 @@ function App() {
       const tokContract = new web3.eth.Contract(MockERC20Contract.abi, tokens[i]);
       tokenContracts.push(tokContract);
       const symbol = await tokContract.methods.symbol().call({ from: accounts[0] });
-      balances[0].push(symbol);
+      balances[0].push(symbol + " balance");
     }
+    balances[0].push("Pending reward");
     const accountBalances = [];
     for (let i = 0; i < mockAccounts.length; i++) {
       balances.push([mockAccounts[i]]);
@@ -193,6 +194,7 @@ function App() {
         const balance = await tokenContracts[j].methods.balanceOf(mockAccounts[i]).call({ from: accounts[0] });
         balances[i+1].push(balance);
       }
+      balances[i+1].push(await stakerContract.methods.pendingRewards(mockAccounts[i]).call({ from: accounts[0] }));
     }
     console.log(balances);
     setTokenBalances(balances);
@@ -270,25 +272,15 @@ function App() {
     await getTokensBalance();
   }
 
-  // from https://github.com/ejwessel/GanacheTimeTraveler/blob/master/utils.js
-  async function advanceTimeAndBlock (time) {
-    //capture current time
-    let block = await web3.eth.getBlock('latest');
-    let forwardTime = block['timestamp'] + time;
-
-    return new Promise((resolve, reject) => {
-      web3.currentProvider.send({
-        jsonrpc: '2.0',
-        method: 'evm_mine',
-        params: [forwardTime],
-        id: new Date().getTime()
-    }, (err, result) => {
-        if (err) { return reject(err) }
-        return resolve(result);
-     })
-    })
+  async function addRewards(_amount) {
+    let amount = web3.utils.toWei("10");
+    let days = 15;
+    let rewardTokenAddr = await stakerContract.methods.rewardToken().call({ from: accounts[0] });
+    const rewardContract = new web3.eth.Contract(MockERC20Contract.abi, rewardTokenAddr);
+    const txResult = await rewardContract.methods.approve(stakerContract.options.address, amount.toString()).send({ from: accounts[0] });
+    const t = await stakerContract.methods.addRewards(amount, days).send({ from: accounts[0] });
+    await getTokensBalance();
   }
-  
 
 
   const CampaignDetails = () => (
@@ -384,6 +376,7 @@ function App() {
           <Button onClick={getTokensBalance} variant="secondary">Get Tokens Balance</Button>{' '}
           <Button onClick={deposit} variant="secondary">Deposit</Button>{' '}
           <Button onClick={withdraw} variant="secondary">Withdraw</Button>{' '}
+          <Button onClick={addRewards} variant="secondary">Add rewards</Button>{' '}
           <Button onClick={getTimes} variant="secondary">Times</Button>{' '}
           <br /><br />
           {(tokenBalances && tokenBalances.length>0)?<BalancesTable /> : undefined}
