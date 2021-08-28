@@ -397,10 +397,18 @@ function App() {
               <br/><br/><br/>
               <div className="input-button-container">
                 <div>
-                <Form.Control placeholder="Amount to stake" onChange={(e) => changeBuyTokensAmount(1,e)}/>
+                <Form.Control placeholder="Amount" onChange={(e) => changeBuyTokensAmount(1,e)}/>
                 </div>
                 <div>
                 <Button onClick={() => buyPresale(1)} variant="secondary">Stake</Button>
+                </div>
+              </div><br/><br/>
+              <div className="input-button-container">
+                <div>
+                <Form.Control placeholder="Amount" onChange={(e) => changeBuyTokensAmount(1,e)}/>
+                </div>
+                <div>
+                <Button onClick={() => buyPresale(1)} variant="secondary">Withdraw</Button>
                 </div>
               </div>
               <br/>
