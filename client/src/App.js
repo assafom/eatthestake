@@ -23,7 +23,6 @@ import "./App.css";
 
 //function App =() => {
 function App() {
-  const [storageValue, setStorageValue] = useState(undefined);
   const [web3, setWeb3] = useState(undefined);
   const [accounts, setAccounts] = useState(undefined);
   const [stakerContract, setStakerContract] = useState(undefined);
@@ -35,6 +34,7 @@ function App() {
   const [tokenBalances, setTokenBalances] = useState([]);
 
   const [buyTokensInput, setBuyTokensInput] = useState({});
+  const [userDetails, setUserDetails] = useState({});
   const [owner, setOwner] = useState(undefined);
 
   const TOKENDECIMALS = 18;
@@ -268,6 +268,16 @@ function App() {
     await getTokensBalance();
   }
 
+  async function getUserDetails() {
+    console.log(accounts[0]);
+    let res = await stakerContract.methods.getFrontendView().call({ from: accounts[0] });
+    //uint256 _rewardPerSecond, uint256 _secondsLeft, uint256 _deposited, uint256 _pending) {
+    let parsed = {rewardPerSecond: (res["_rewardPerSecond"]*24*60*60/(10**18)).toFixed(6), daysLeft: (res["_secondsLeft"]/60/60/24).toFixed(6), deposited: (res["_deposited"]/10**18).toFixed(6), pending: (res["_pending"]/10**18).toFixed(6) }
+    console.log(res);
+    console.log(parsed);
+    setUserDetails(parsed);
+  }
+
   async function withdraw(_amount) {
     let amount = web3.utils.toWei("10");
     const t = await stakerContract.methods.withdraw(amount).send({ from: accounts[0] });
@@ -322,14 +332,14 @@ function App() {
 
   const CardKeyValue = (props) => (
     <>
-      <div style={{ display: 'flex' }}>
+      <div style={{ display: 'flex' , width: '90%' , margin: 'auto' }}>
         <div>
           {props.label}
         </div>
         <div style={{ marginLeft: 'auto' }}>
           {props.value}
         </div>
-      </div><br/>
+      </div><hr/>
     </>
   );
 
@@ -388,13 +398,17 @@ function App() {
       <div className="App">
         <BlockchainContext.Provider value={{web3, accounts, stakerContract}}>
           
-          <br/><br/>
+          <br/>
           <div style={{display: "flex"}}>
             <Container className="square inner-container">
-              <br/><br/>  
-              <h2>Stake</h2>
-              Current reward period:
-              <br/><br/><br/>
+              <br/>
+              <CardKeyValue label="Global rewards per day" value={userDetails["rewardPerSecond"]} />
+              <CardKeyValue label="Days left" value={userDetails["daysLeft"]} />
+              <CardKeyValue label="Your staked" value={userDetails["deposited"]} />
+              <CardKeyValue label="Your pending rewards" value={userDetails["pending"]} />
+              
+
+              <br/><br/>
               <div className="input-button-container">
                 <div>
                 <Form.Control placeholder="Amount" onChange={(e) => changeBuyTokensAmount(1,e)}/>
@@ -412,11 +426,12 @@ function App() {
                 </div>
               </div>
               <br/>
-              <br/>
             </Container>
           </div>
           <div>
+            <br/>
             <hr />
+            <br/>
             Loaded ETH address: <b>{accounts && accounts[0]?accounts[0] : undefined}</b><br/>
             Loaded Staker address: <b>{stakerContract?stakerContract.options.address : undefined}</b><br/><br/>
 
@@ -426,7 +441,7 @@ function App() {
             <Button onClick={deposit} variant="secondary">Deposit</Button>{' '}
             <Button onClick={withdraw} variant="secondary">Withdraw</Button>{' '}
             <Button onClick={addRewards} variant="secondary">Add rewards</Button>{' '}
-            <Button onClick={getTimes} variant="secondary">Times</Button>{' '}
+            <Button onClick={getUserDetails} variant="secondary">Deets</Button>{' '}
             <br /><br />
             {(tokenBalances && tokenBalances.length>0)?<BalancesTable /> : undefined}
           </div>

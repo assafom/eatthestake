@@ -106,7 +106,7 @@ contract Staker is Ownable {
     }
 
     function pendingRewards(address _user)
-    external view returns (uint256) {
+    public view returns (uint256) {
         UserInfo storage user = users[_user];
         uint256 accumulated = accumulatedRewardPerShare;
         uint256 totalStaked = depositToken.balanceOf(address(this));
@@ -122,6 +122,16 @@ contract Staker is Ownable {
             accumulated = accumulated.add(totalNewReward.mul(1e12).div(totalStaked));
         }
         return user.deposited.mul(accumulated).div(1e12).div(1e7).sub(user.rewardsAlreadyConsidered);
+    }
+
+
+    function getFrontendView()
+    external view returns (uint256 _rewardPerSecond, uint256 _secondsLeft, uint256 _deposited, uint256 _pending) {
+        _rewardPerSecond = rewardPerSecond.div(1e7);
+        if (block.timestamp <= rewardPeriodEndTimestamp)
+            _secondsLeft = rewardPeriodEndTimestamp.sub(block.timestamp); // else, defaults to 0
+        _deposited = users[msg.sender].deposited;
+        _pending = pendingRewards(msg.sender);
     }
     
     // For testing
