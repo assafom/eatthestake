@@ -2,6 +2,19 @@
   text-align: center;
   width: 1100px;
   margin: auto;
+  
+
+}
+
+.outerApp {
+  font-family: 'Nunito', sans-serif;
+  color: white;
+}
+
+body {
+  /*background-color: #555A64;*/
+  background-color: #2F2F2F;
+
 }
 
 .App-logo {
@@ -21,6 +34,53 @@
 
 .App-link {
   color: #09d3ac;
+}
+
+.navbar-brand {
+  display: flex;
+}
+
+.inner-container {
+  color: black;
+  background-color: #33D3D2;
+  width: 50%;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.main-buttons-div {
+  display: flex;
+  margin-left: 25px;
+  margin-right: 25px;
+}
+
+.main-buttons-div button {
+  width: 40%;
+  border-radius: 10px;
+  font-size: 24px;
+  padding-top: 15px;
+  padding-bottom: 15px;
+}
+
+.navbar-brand img {
+  margin: auto;
+}
+
+.navbar .container {
+  margin-left: initial;
+}
+
+.navbar-text {
+  font-weight: 800;
+  font-size: 25px;
+  margin: auto;
+  margin-left: 18px;
+  color: white !important;
+}
+
+h1 {
+  font-size: 56px;
+  font-weight: 800;
 }
 
 

@@ -13,7 +13,9 @@ import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 import FormControl from 'react-bootstrap/FormControl';
 import Form from 'react-bootstrap/Form';
-
+import Image from 'react-bootstrap/Image';
+import Navbar from 'react-bootstrap/Navbar';
+import Container from 'react-bootstrap/Container';
 
 
 
@@ -331,9 +333,30 @@ function App() {
     </>
   );
 
+  const Nav = () => (
+    <>
+    <Navbar bg="dark" variant="dark">
+    <Container>
+      <Navbar.Brand>
+        <img
+          alt=""
+          src={require('./logo.png')}
+          width="410"
+          height="40"
+          className="d-inline-block align-top"
+        />{' '}
+          <div className="navbar-text">
+            
+          </div>
+          </Navbar.Brand>
+        </Container>
+      </Navbar>
+    </>
+  )
+
   const BalancesTable = () => (
     <>
-      <Table striped bordered hover size="sm">
+      <Table striped bordered hover size="sm" variant="dark">
         <thead>
           <tr>
             {tokenBalances[0].map((elem, index) => (
@@ -360,29 +383,42 @@ function App() {
     return <div>Loading Web3, accounts, and contract...</div>;
   }
   return (
-    <div className="App">
-      <BlockchainContext.Provider value={{web3, accounts, stakerContract}}>
-        <h1>Eat The Stake</h1>
-          <ChildComponent>
+    <div className="outerApp">
+      <Nav />
+      <div className="App">
+        <BlockchainContext.Provider value={{web3, accounts, stakerContract}}>
+          
+          <br/><br/>
+          <Container className="square inner-container">
+            <br/><br/>  
+            <h2>Stake</h2>
+            Current reward period:
+            <br/><br/><br/>
+            <div  className="main-buttons-div" >
+              <Button onClick={deposit} variant="secondary">Deposit</Button>{' '}
+              <Button onClick={withdraw} variant="secondary" style={{ marginLeft: 'auto' }}>Withdraw</Button>{' '}
+            </div>
+            <br/>
+          </Container>
+          <div>
+            <hr />
+            Loaded ETH address: <b>{accounts && accounts[0]?accounts[0] : undefined}</b><br/>
+            Loaded Staker address: <b>{stakerContract?stakerContract.options.address : undefined}</b><br/><br/>
 
-          </ChildComponent>
-        <div>
-        <hr />
-        Loaded ETH address: <b>{accounts && accounts[0]?accounts[0] : undefined}</b><br/>
-        Loaded Staker address: <b>{stakerContract?stakerContract.options.address : undefined}</b><br/><br/>
-
-        <b>Dev dashboard</b><br/><br/>
-          <Button onClick={getCampaignsData} variant="secondary">Update campaigns manually</Button>{' '}
-          <Button onClick={getTokensBalance} variant="secondary">Get Tokens Balance</Button>{' '}
-          <Button onClick={deposit} variant="secondary">Deposit</Button>{' '}
-          <Button onClick={withdraw} variant="secondary">Withdraw</Button>{' '}
-          <Button onClick={addRewards} variant="secondary">Add rewards</Button>{' '}
-          <Button onClick={getTimes} variant="secondary">Times</Button>{' '}
-          <br /><br />
-          {(tokenBalances && tokenBalances.length>0)?<BalancesTable /> : undefined}
-        </div>
-      </BlockchainContext.Provider>
+            <b>Dev dashboard</b><br/><br/>
+            <Button onClick={getCampaignsData} variant="secondary">Update campaigns manually</Button>{' '}
+            <Button onClick={getTokensBalance} variant="secondary">Get Tokens Balance</Button>{' '}
+            <Button onClick={deposit} variant="secondary">Deposit</Button>{' '}
+            <Button onClick={withdraw} variant="secondary">Withdraw</Button>{' '}
+            <Button onClick={addRewards} variant="secondary">Add rewards</Button>{' '}
+            <Button onClick={getTimes} variant="secondary">Times</Button>{' '}
+            <br /><br />
+            {(tokenBalances && tokenBalances.length>0)?<BalancesTable /> : undefined}
+          </div>
+        </BlockchainContext.Provider>
+      </div>
     </div>
+    
   )
 }
 
