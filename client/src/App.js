@@ -13,8 +13,6 @@ import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 import FormControl from 'react-bootstrap/FormControl';
 import Form from 'react-bootstrap/Form';
-import Image from 'react-bootstrap/Image';
-import Navbar from 'react-bootstrap/Navbar';
 import Container from 'react-bootstrap/Container';
 
 
@@ -26,6 +24,8 @@ function App() {
   const [web3, setWeb3] = useState(undefined);
   const [accounts, setAccounts] = useState(undefined);
   const [stakerContract, setStakerContract] = useState(undefined);
+  const [depositTokenContract, setDepositTokenContract] = useState(undefined);
+  const [rewardTokenContract, setRewardTokenContract] = useState(undefined);
 
   const [erc20Factory, setErc20Factory] = useState(undefined);
 
@@ -65,6 +65,14 @@ function App() {
           erc20FactoryDeployedNetwork && erc20FactoryDeployedNetwork.address,
         );
 
+        const depositTokenAddr = await instance.methods.depositToken().call({ from: accounts[0] });
+        const depositContract = new web3.eth.Contract(MockERC20Contract.abi, depositTokenAddr);
+        console.log("debug");
+        console.log(depositContract);
+
+        const rewardTokenAddr = await instance.methods.rewardToken().call({ from: accounts[0] });
+        const rewardContract = new web3.eth.Contract(MockERC20Contract.abi, rewardTokenAddr);
+
         console.log(instance);
         console.log(erc20Factoryinstance);
 
@@ -77,6 +85,8 @@ function App() {
         setAccounts(accounts);
         setStakerContract(instance);
         setErc20Factory(erc20Factoryinstance);
+        setDepositTokenContract(depositContract);
+        setRewardTokenContract(rewardContract);
         setOwner(await instance.methods.owner().call({ from: accounts[0] }));
 
         window.ethereum.on('accountsChanged', function (_accounts) {
@@ -105,10 +115,12 @@ function App() {
     if (typeof web3 !== 'undefined'
       && typeof accounts !== 'undefined'
       && typeof stakerContract !== 'undefined'
-      && typeof erc20Factory !== 'undefined') {
+      && typeof erc20Factory !== 'undefined'
+      && typeof depositTokenContract !== 'undefined'
+      && typeof rewardTokenContract !== 'undefined') {
         load();
       }
-  }, [web3, accounts, stakerContract, erc20Factory])
+  }, [web3, accounts, stakerContract, erc20Factory, depositTokenContract, rewardTokenContract])
 
   async function buyPresale(_cId) {
     const amount = new web3.utils.toBN(buyTokensInput[_cId]).mul(new web3.utils.toBN(campaigns[_cId].price));
@@ -248,9 +260,7 @@ function App() {
 
   async function deposit(_amount) {
     let amount = web3.utils.toWei("10");
-    let depositTokenAddr = await stakerContract.methods.depositToken().call({ from: accounts[0] });
-    const depositContract = new web3.eth.Contract(MockERC20Contract.abi, depositTokenAddr);
-    const txResult = await depositContract.methods.approve(stakerContract.options.address, amount.toString()).send({ from: accounts[0] });
+    const txResult = await depositTokenContract.methods.approve(stakerContract.options.address, amount.toString()).send({ from: accounts[0] });
     const t = await stakerContract.methods.deposit(amount).send({ from: accounts[0] });
     await getUserDetails();
     await getTokensBalance();
@@ -273,8 +283,18 @@ function App() {
   async function getUserDetails() {
     console.log(accounts[0]);
     let res = await stakerContract.methods.getFrontendView().call({ from: accounts[0] });
+    let depBalance = await depositTokenContract.methods.balanceOf(accounts[0]).call({ from: accounts[0] });
+    let depSymbol = await depositTokenContract.methods.symbol().call({ from: accounts[0] });
+    let rewSymbol = await rewardTokenContract.methods.symbol().call({ from: accounts[0] });
     //uint256 _rewardPerSecond, uint256 _secondsLeft, uint256 _deposited, uint256 _pending) {
-    let parsed = {rewardPerSecond: (res["_rewardPerSecond"]*24*60*60/(10**18)).toFixed(6), daysLeft: (res["_secondsLeft"]/60/60/24).toFixed(6), deposited: (res["_deposited"]/10**18).toFixed(6), pending: (res["_pending"]/10**18).toFixed(6) }
+    let parsed = {
+      rewardPerSecond: (res["_rewardPerSecond"]*24*60*60/(10**18)).toFixed(6)
+      , daysLeft: (res["_secondsLeft"]/60/60/24).toFixed(6)
+      , deposited: (res["_deposited"]/10**18).toFixed(6)
+      , pending: (res["_pending"]/10**18).toFixed(6)
+      , depositTokenBalance: (depBalance/10**18)
+      , depSymbol: depSymbol
+      , rewSymbol: rewSymbol }
     console.log(res);
     console.log(parsed);
     setUserDetails(parsed);
@@ -290,9 +310,7 @@ function App() {
   async function addRewards(_amount) {
     let amount = web3.utils.toWei("10");
     let days = 15;
-    let rewardTokenAddr = await stakerContract.methods.rewardToken().call({ from: accounts[0] });
-    const rewardContract = new web3.eth.Contract(MockERC20Contract.abi, rewardTokenAddr);
-    const txResult = await rewardContract.methods.approve(stakerContract.options.address, amount.toString()).send({ from: accounts[0] });
+    const txResult = await rewardTokenContract.methods.approve(stakerContract.options.address, amount.toString()).send({ from: accounts[0] });
     const t = await stakerContract.methods.addRewards(amount, days).send({ from: accounts[0] });
     await getUserDetails();
     await getTokensBalance();
@@ -347,24 +365,26 @@ function App() {
     </>
   );
 
-  const Nav = () => (
+
+  const Nav2 = () => (
     <>
-    <Navbar bg="dark" variant="dark">
-    <Container>
-      <Navbar.Brand>
-        <img
-          alt=""
-          src={require('./logo.png')}
-          width="410"
-          height="40"
-          className="d-inline-block align-top"
-        />{' '}
-          <div className="navbar-text">
-            
-          </div>
-          </Navbar.Brand>
-        </Container>
-      </Navbar>
+      <div className="minimalistic-nav-bar">
+        <div>
+          <img
+            alt=""
+            src={require('./logo.png')}
+            width="410"
+            height="40"
+            className="d-inline-block align-top"
+          />
+        </div>
+        <div>
+          STAKER
+        </div>
+        <div>
+          Connected: <a href="#login">0x..3fa2 </a>
+        </div>
+      </div>
     </>
   )
 
@@ -398,11 +418,11 @@ function App() {
   }
   return (
     <div className="outerApp">
-      <Nav />
+      <Nav2 />
       <div className="App">
         <BlockchainContext.Provider value={{web3, accounts, stakerContract}}>
           
-          <br/>
+          <br/><br/>
           <div style={{display: "flex"}}>
             <Container className="square inner-container">
               <br/>
@@ -413,21 +433,33 @@ function App() {
               
 
               <br/><br/>
+              <div className="label-above-button">
+                Available {userDetails["depSymbol"]} balance to stake: {userDetails["depositTokenBalance"]}
+              </div>
               <div className="input-button-container">
                 <div>
-                <Form.Control placeholder="Amount" onChange={(e) => changeBuyTokensAmount(1,e)}/>
+                  <Form.Control placeholder="Amount" onChange={(e) => changeBuyTokensAmount(1,e)}/>
                 </div>
                 <div>
-                <Button onClick={() => buyPresale(1)} variant="secondary">Stake</Button>
+                  <Button onClick={() => buyPresale(1)} variant="secondary">Stake</Button>
                 </div>
-              </div><br/><br/>
+              </div><br/>
+              <div className="label-above-button">
+                {userDetails["depSymbol"]} staked: {userDetails["deposited"]}
+              </div>
               <div className="input-button-container">
                 <div>
-                <Form.Control placeholder="Amount" onChange={(e) => changeBuyTokensAmount(1,e)}/>
+                  <Form.Control placeholder="Amount" onChange={(e) => changeBuyTokensAmount(1,e)}/>
                 </div>
                 <div>
-                <Button onClick={() => buyPresale(1)} variant="secondary">Withdraw</Button>
+                  <Button onClick={() => buyPresale(1)} variant="secondary">Unstake</Button>
                 </div>
+              </div><br/>
+              <div className="label-above-button">
+                Pending {userDetails["rewSymbol"]} rewards: {userDetails["pending"]}
+              </div>
+              <div className="button-stretch">
+                <Button onClick={() => buyPresale(1)} variant="secondary">Claim rewards</Button>
               </div>
               <br/>
             </Container>

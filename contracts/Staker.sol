@@ -67,6 +67,9 @@ contract Staker is Ownable {
         uint256 totalNewReward = secondsSinceLastRewardUpdate.mul(rewardPerSecond);
         accumulatedRewardPerShare = accumulatedRewardPerShare.add(totalNewReward.mul(1e12).div(totalStaked));
         lastRewardTimestamp = block.timestamp;
+        if (block.timestamp > rewardPeriodEndTimestamp) {
+            rewardPerSecond = 0;
+        }
     }
 
     // User should have allowed transfer before.

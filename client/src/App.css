@@ -36,8 +36,38 @@ body {
   color: #09d3ac;
 }
 
+.minimalistic-nav-bar {
+  display: flex;
+  background-color: #212529;
+  padding-top: .5rem;
+  padding-bottom: .5rem;
+  padding-left: .2rem;
+  padding-right: .2rem;
+  justify-content: space-between;
+}
+
+.minimalistic-nav-bar div:nth-of-type(2) {
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.minimalistic-nav-bar div:nth-of-type(3) {
+  width: 410px;
+  text-align: end;
+  margin-right: .2rem;
+  font-weight: 400;
+  font-size: 20px;
+  align-items: center;
+  display: flex;
+  justify-content: flex-end;
+}
+
 .navbar-brand {
   display: flex;
+}
+
+.navbar-expand {
+  justify-content: space-between !important;
 }
 
 .inner-container {
@@ -49,6 +79,24 @@ body {
   font-size: 24px;
   font-weight: 600;
   box-shadow: 0px 0px 30px 0px rgb(0 0 0 / 50%);
+}
+
+.button-stretch button {
+  border-radius: 15px;
+  font-size: 24px;
+  font-weight: 600;
+  box-shadow: 0px 0px 10px 0px rgb(0 0 0 / 50%);
+  width: 90%;
+}
+
+.label-above-button {
+  font-size: 16px;
+  text-align: start;
+  width: 90%;
+  margin: auto;
+  color: lightgrey;
+  font-weight: 300;
+  padding-left: 10px;
 }
 
 .main-buttons-div {
