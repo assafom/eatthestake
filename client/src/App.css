@@ -49,6 +49,7 @@ body {
 .minimalistic-nav-bar div:nth-of-type(2) {
   font-size: 28px;
   font-weight: 800;
+  text-shadow: 1px 1px 2px black, 0 0 25px cyan, 0 0 5px darkcyan;
 }
 
 .minimalistic-nav-bar div:nth-of-type(3) {
@@ -172,6 +173,7 @@ h1 {
   border-bottom-right-radius: 0px;
   font-size: 24px;
   box-shadow: 0px 0px 10px 0px rgb(0 0 0 / 50%);
+  /*text-shadow: 2px 2px 4px darkgrey;*/
 }
 
 .input-button-container div:nth-of-type(1) .form-control:focus {
