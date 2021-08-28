@@ -46,6 +46,7 @@ body {
   width: 50%;
   border-radius: 20px;
   font-weight: 600;
+  box-shadow: 0px 0px 30px 0px rgb(0 0 0 / 50%);
 }
 
 .main-buttons-div {
@@ -58,9 +59,15 @@ body {
   width: 40%;
   border-radius: 10px;
   font-size: 24px;
+  font-weight: 600;
   padding-top: 15px;
   padding-bottom: 15px;
+  box-shadow: 0px 0px 10px 0px rgb(0 0 0 / 50%);
 }
+.main-buttons-div button:focus , button:active {
+  box-shadow: 0px 0px 10px 0px rgb(0 0 0 / 50%) !important;
+}
+
 
 .navbar-brand img {
   margin: auto;
