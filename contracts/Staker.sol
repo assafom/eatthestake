@@ -15,14 +15,14 @@ contract Staker is Ownable {
         uint256 rewardsAlreadyConsidered;
     }
 
-    uint256 rewardPeriodEndTimestamp;
-    uint256 rewardPerSecond; // multiplied by 1e6
+    uint256 public rewardPeriodEndTimestamp;
+    uint256 public rewardPerSecond; // multiplied by 1e6
 
-    uint256 lastRewardTimestamp;
-    uint256 accumulatedRewardPerShare; // multiplied by 1e12
+    uint256 public lastRewardTimestamp;
+    uint256 public accumulatedRewardPerShare; // multiplied by 1e12
 
-    IERC20 depositToken;
-    IERC20 rewardToken;
+    IERC20 public depositToken;
+    IERC20 public rewardToken;
 
     mapping (address => UserInfo) users;
 
@@ -35,6 +35,7 @@ contract Staker is Ownable {
         rewardToken = IERC20(_rewardToken);
     }
 
+    // User should have allowed transfer before.
     function addRewards(uint256 _rewardsAmount, uint256 _lengthInDays)
     external onlyOwner {
         require(block.timestamp > rewardPeriodEndTimestamp, "Staker: can't add rewards before period finished"); // TODO: might be not necessary, need to check
@@ -66,6 +67,7 @@ contract Staker is Ownable {
         lastRewardTimestamp = block.timestamp;
     }
 
+    // User should have allowed transfer before.
     function deposit(uint256 _amount)
     public {
         UserInfo storage user = users[msg.sender];
@@ -94,4 +96,9 @@ contract Staker is Ownable {
         emit Withdraw(msg.sender, _amount);
     }
     
+    // For testing
+    function getTime()
+    public view returns (uint256) {
+        return block.timestamp;
+    }
 }

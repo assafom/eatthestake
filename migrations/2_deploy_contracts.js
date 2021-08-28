@@ -25,5 +25,5 @@ module.exports = async function(deployer, network, accounts) {
 
   }
 
-    deployer.deploy(Staker, depositToken, rewardToken);
+    await deployer.deploy(Staker, depositToken, rewardToken);
 };
