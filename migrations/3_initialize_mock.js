@@ -1,4 +1,4 @@
-var Prisale = artifacts.require("./Prisale.sol");
+var Staker = artifacts.require("./Staker.sol");
 var ERC20Factory = artifacts.require("./ERC20Factory.sol");
 var MockERC20 = artifacts.require("./MockERC20.sol");
 const Web3=require('Web3');
@@ -8,7 +8,7 @@ module.exports = async function(deployer, network, accounts) {
     return;
   }
 
-  const prisale = await Prisale.deployed();
+  /*const prisale = await Prisale.deployed();
   console.log("prisale address " + prisale.address);
   console.log("prisale owner " + await prisale.owner());
 
@@ -24,5 +24,5 @@ module.exports = async function(deployer, network, accounts) {
   const tether = await MockERC20.at(tokens[0]);
   await tether.mint(accounts[1], Web3.utils.toWei("10000"));
   await tether.mint(accounts[2], Web3.utils.toWei("10000"));
-  await prisale.setUSDTToken(tokens[0]);
+  await prisale.setUSDTToken(tokens[0]);*/
 };
