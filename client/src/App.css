@@ -43,7 +43,7 @@ body {
 .inner-container {
   color: black;
   background-color: #33D3D2;
-  width: 50%;
+  width: 35%;
   border-radius: 20px;
   font-weight: 600;
   box-shadow: 0px 0px 30px 0px rgb(0 0 0 / 50%);
@@ -109,21 +109,40 @@ h1 {
   width: 100%;
 }
 
-.card-buy-tokens {
+.input-button-container {
   display: flex;
+  width: 90%;
+  margin: auto;
 }
 
-.card-buy-tokens div:nth-of-type(1) .form-control {
+.input-button-container div:nth-of-type(1) .form-control {
+  border-top-left-radius: 15px;
+  border-bottom-left-radius: 15px;
   border-top-right-radius: 0px;
   border-bottom-right-radius: 0px;
+  font-size: 24px;
+  box-shadow: 0px 0px 10px 0px rgb(0 0 0 / 50%);
 }
 
-.card-buy-tokens div:nth-of-type(1) .form-control:focus {
+.input-button-container div:nth-of-type(1) .form-control:focus {
   border-color: none;
   box-shadow: none;
 }
 
-.card-buy-tokens div:nth-of-type(2) .btn {
+.input-button-container div:nth-of-type(2) .btn {
+  border-top-right-radius: 15px;
+  border-bottom-right-radius: 15px;
   border-top-left-radius: 0px;
   border-bottom-left-radius: 0px;
+  font-size: 24px;
+  font-weight: 600;
+  box-shadow: 0px 0px 10px 0px rgb(0 0 0 / 50%);
+}
+
+.input-button-container div:nth-of-type(1) {
+  flex-grow: 4;
+}
+
+.input-button-container div:nth-of-type(2) {
+  margin-left: auto;
 }

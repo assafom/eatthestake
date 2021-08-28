@@ -389,17 +389,24 @@ function App() {
         <BlockchainContext.Provider value={{web3, accounts, stakerContract}}>
           
           <br/><br/>
-          <Container className="square inner-container">
-            <br/><br/>  
-            <h2>Stake</h2>
-            Current reward period:
-            <br/><br/><br/>
-            <div  className="main-buttons-div" >
-              <Button onClick={deposit} variant="secondary">Deposit</Button>{' '}
-              <Button onClick={withdraw} variant="secondary" style={{ marginLeft: 'auto' }}>Withdraw</Button>{' '}
-            </div>
-            <br/>
-          </Container>
+          <div style={{display: "flex"}}>
+            <Container className="square inner-container">
+              <br/><br/>  
+              <h2>Stake</h2>
+              Current reward period:
+              <br/><br/><br/>
+              <div className="input-button-container">
+                <div>
+                <Form.Control placeholder="Amount to stake" onChange={(e) => changeBuyTokensAmount(1,e)}/>
+                </div>
+                <div>
+                <Button onClick={() => buyPresale(1)} variant="secondary">Stake</Button>
+                </div>
+              </div>
+              <br/>
+              <br/>
+            </Container>
+          </div>
           <div>
             <hr />
             Loaded ETH address: <b>{accounts && accounts[0]?accounts[0] : undefined}</b><br/>
