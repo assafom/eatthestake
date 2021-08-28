@@ -20,8 +20,6 @@ contract("Staker", async accounts => {
     const staker = await Staker.deployed();
     const depositTokenAddr = await staker.depositToken.call();
     const rewardTokenAddr = await staker.rewardToken.call();
-    console.log(depositTokenAddr);
-    console.log(rewardTokenAddr);
 
     let rewardAmount = web3.utils.toWei("300");
 
@@ -31,13 +29,58 @@ contract("Staker", async accounts => {
     await rewardToken.approve(staker.address, rewardAmount, { from: accounts[0] });
 
     await staker.addRewards(rewardAmount, 30);
+    temp = await staker.rewardPeriodEndTimestamp.call();
+    console.log("ending timestamp :" + temp.toString());
 
-    console.log(await staker.rewardPerSecond.call());
+    let depositAmount = web3.utils.toWei("10");
+    await depositToken.approve(staker.address, depositAmount, { from: accounts[1] });
+    await staker.deposit(depositAmount, { from: accounts[1] });
+    let bbefore = await staker.pendingRewards.call(accounts[1], { from: accounts[1] });
+    console.log(bbefore.toString());
+    console.log(web3.utils.toWei(bbefore));
+    await timeMachine.advanceTimeAndBlock(60*60*24*15);
+    console.log("adv 15, current timestamp :" + (await staker.getTime.call()).toString());
+    temp = await staker.pendingRewards.call(accounts[1], { from: accounts[0] });
+    console.log("p account1 after 15 : " + web3.utils.toWei(temp));
+
+    await depositToken.approve(staker.address, depositAmount, { from: accounts[2] });
+    await staker.deposit(depositAmount, { from: accounts[2] });
+    await timeMachine.advanceTimeAndBlock(60*60*24*15);
+    console.log("adv 15, current timestamp :" + (await staker.getTime.call()).toString());
+    temp = await staker.pendingRewards.call(accounts[1], { from: accounts[0] });
+    console.log("p account1 after 30 : " + web3.utils.toWei(temp));
+    temp = await staker.pendingRewards.call(accounts[2], { from: accounts[0] });
+    console.log("p account2 after 30 : " + web3.utils.toWei(temp));
+
+    await timeMachine.advanceTimeAndBlock(60*60*24*15);
+    console.log("adv 15, current timestamp :" + (await staker.getTime.call()).toString());
+    temp = await staker.pendingRewards.call(accounts[1], { from: accounts[0] });
+    console.log("p account1 after 45 : " + web3.utils.toWei(temp));
+    temp = await staker.pendingRewards.call(accounts[2], { from: accounts[0] });
+    console.log("p account2 after 45 : " + web3.utils.toWei(temp));
+
+    temp = await staker.withdraw.call(depositAmount, { from: accounts[1] });
+    temp = await rewardToken.balanceOf.call(accounts[1], { from: accounts[1] });
+    console.log("account1 at end : " + web3.utils.toWei(temp));
+    temp = await staker.withdraw.call(depositAmount, { from: accounts[2] });
+    temp = await rewardToken.balanceOf.call(accounts[2], { from: accounts[2] });
+    console.log("account2 at end : " + web3.utils.toWei(temp));
+    console.log("orig rewards: " + rewardAmount);
+
+
+    /*
+    await staker.withdraw(depositAmount, { from: accounts[1] });
+    console.log("reward balance after:");
+    let newbalance = await rewardToken.balanceOf.call(accounts[1], { from: accounts[1] });
+    console.log(newbalance.toString());
+    console.log(web3.utils.toWei(newbalance));*/
+
+    /*console.log(await staker.rewardPerSecond.call());
 
     console.log((await staker.getTime.call()).toString());
 
     await timeMachine.advanceTimeAndBlock(60*60*24*30);
-    console.log((await staker.getTime.call()).toString());
+    console.log((await staker.getTime.call()).toString());*/
     /*
     // Set value of 89
     await staker.set(89, { from: accounts[0] });
