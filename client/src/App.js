@@ -13,7 +13,6 @@ import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 import FormControl from 'react-bootstrap/FormControl';
 import Form from 'react-bootstrap/Form';
-//import TimeMachine = from 'ganache-time-traveler';
 
 
 
@@ -256,6 +255,12 @@ function App() {
     console.log(t);
     t = await stakerContract.methods.rewardPeriodEndTimestamp().call({ from: accounts[0] });
     console.log(t);
+    t = await stakerContract.methods.lastRewardTimestamp().call({ from: accounts[0] });
+    console.log(t);
+    console.log(new Date().getTime());
+    //await advanceTimeAndBlock(60*60*24*15);
+    t = await stakerContract.methods.getTime().call({ from: accounts[0] });
+    console.log(t);
     await getTokensBalance();
   }
 
@@ -263,6 +268,25 @@ function App() {
     let amount = web3.utils.toWei("10");
     const t = await stakerContract.methods.withdraw(amount).send({ from: accounts[0] });
     await getTokensBalance();
+  }
+
+  // from https://github.com/ejwessel/GanacheTimeTraveler/blob/master/utils.js
+  async function advanceTimeAndBlock (time) {
+    //capture current time
+    let block = await web3.eth.getBlock('latest');
+    let forwardTime = block['timestamp'] + time;
+
+    return new Promise((resolve, reject) => {
+      web3.currentProvider.send({
+        jsonrpc: '2.0',
+        method: 'evm_mine',
+        params: [forwardTime],
+        id: new Date().getTime()
+    }, (err, result) => {
+        if (err) { return reject(err) }
+        return resolve(result);
+     })
+    })
   }
   
 

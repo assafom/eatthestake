@@ -50,7 +50,7 @@ contract Staker is Ownable {
             return;
         }
         uint256 totalStaked = depositToken.balanceOf(address(this));
-        if (totalStaked == 0) {
+        if ((totalStaked == 0) || lastRewardTimestamp > rewardPeriodEndTimestamp) {
             lastRewardTimestamp = block.timestamp;
             return;
         }
@@ -108,7 +108,7 @@ contract Staker is Ownable {
         UserInfo storage user = users[_user];
         uint256 accumulated = accumulatedRewardPerShare;
         uint256 totalStaked = depositToken.balanceOf(address(this));
-        if (block.timestamp > lastRewardTimestamp && totalStaked != 0) {
+        if (block.timestamp > lastRewardTimestamp && lastRewardTimestamp <= rewardPeriodEndTimestamp && totalStaked != 0) {
             uint256 endingTime;
             if (block.timestamp > rewardPeriodEndTimestamp) {
                 endingTime = rewardPeriodEndTimestamp;
