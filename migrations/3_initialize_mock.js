@@ -8,6 +8,18 @@ module.exports = async function(deployer, network, accounts) {
     return;
   }
 
+  const staker = await Staker.deployed();
+  const depositTokenAddr = await staker.depositToken.call();
+  const rewardTokenAddr = await staker.rewardToken.call();
+
+  let rewardAmount = web3.utils.toWei("300");
+
+  const rewardToken = await MockERC20.at(rewardTokenAddr);
+
+  await rewardToken.approve(staker.address, rewardAmount, { from: accounts[0] });
+
+  await staker.addRewards(rewardAmount, 30, { from: accounts[0] });
+
   /*const prisale = await Prisale.deployed();
   console.log("prisale address " + prisale.address);
   console.log("prisale owner " + await prisale.owner());

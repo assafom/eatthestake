@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import PrisaleContract from "./contracts/Prisale.json";
+import StakerContract from "./contracts/Staker.json";
 import ERC20FactoryContract from "./contracts/ERC20Factory.json";
 import MockERC20Contract from "./contracts/MockERC20.json";
 import getWeb3 from "./getWeb3";
@@ -13,6 +13,8 @@ import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 import FormControl from 'react-bootstrap/FormControl';
 import Form from 'react-bootstrap/Form';
+//import TimeMachine = from 'ganache-time-traveler';
+
 
 
 
@@ -23,7 +25,7 @@ function App() {
   const [storageValue, setStorageValue] = useState(undefined);
   const [web3, setWeb3] = useState(undefined);
   const [accounts, setAccounts] = useState(undefined);
-  const [prisaleContract, setPrisaleContract] = useState(undefined);
+  const [stakerContract, setStakerContract] = useState(undefined);
 
   const [erc20Factory, setErc20Factory] = useState(undefined);
 
@@ -50,9 +52,9 @@ function App() {
         // Get the contract instance.
         //const networkId = await web3.eth.net.getId();
         const networkId = await window.ethereum.request({ method: 'net_version' });
-        const deployedNetwork = PrisaleContract.networks[networkId];
+        const deployedNetwork = StakerContract.networks[networkId];
         const instance = new web3.eth.Contract(
-          PrisaleContract.abi,
+          StakerContract.abi,
           deployedNetwork && deployedNetwork.address,
         );
 
@@ -62,14 +64,17 @@ function App() {
           erc20FactoryDeployedNetwork && erc20FactoryDeployedNetwork.address,
         );
 
-        console.log("FACTORY " + erc20Factoryinstance.methods);
-        console.log(erc20FactoryDeployedNetwork.address);
+        console.log(instance);
+        console.log(erc20Factoryinstance);
+
+        //console.log("FACTORY " + erc20Factoryinstance.methods);
+        //console.log(erc20FactoryDeployedNetwork.address);
   
         // Set web3, accounts, and contract to the state, and then proceed with an
         // example of interacting with the contract's methods.
         setWeb3(web3);
         setAccounts(accounts);
-        setPrisaleContract(instance);
+        setStakerContract(instance);
         setErc20Factory(erc20Factoryinstance);
         setOwner(await instance.methods.owner().call({ from: accounts[0] }));
 
@@ -90,23 +95,18 @@ function App() {
   },[]);
 
   useEffect(() => {
-    const load = async() => {
-      await getCampaignsData();
+    const load = async() => { 
+      await getTokensBalance();
       console.log(campaigns);
     }
 
     if (typeof web3 !== 'undefined'
       && typeof accounts !== 'undefined'
-      && typeof prisaleContract !== 'undefined'
+      && typeof stakerContract !== 'undefined'
       && typeof erc20Factory !== 'undefined') {
         load();
       }
-  }, [web3, accounts, prisaleContract, erc20Factory])
-
-  function handleFileUpload(e) {
-    const file = e.target.files[0];
-    console.log(file);
-  }
+  }, [web3, accounts, stakerContract, erc20Factory])
 
   async function buyPresale(_cId) {
     const amount = new web3.utils.toBN(buyTokensInput[_cId]).mul(new web3.utils.toBN(campaigns[_cId].price));
@@ -114,25 +114,25 @@ function App() {
     const usdtContract = new web3.eth.Contract(MockERC20Contract.abi, tokens[0]);
     // Make sure user can still buy; check balance and presale still on
     // TODO check if amount > 0
-    const txResult = await usdtContract.methods.approve(prisaleContract.options.address, amount.toString()).send({ from: accounts[0] });
-    const t = await prisaleContract.methods.buy(_cId, buyTokensInput[_cId]).send({ from: accounts[0] });
+    const txResult = await usdtContract.methods.approve(stakerContract.options.address, amount.toString()).send({ from: accounts[0] });
+    const t = await stakerContract.methods.buy(_cId, buyTokensInput[_cId]).send({ from: accounts[0] });
     await getCampaignsData();
     await getTokensBalance();
   }
 
   async function getCampaignsData() {
-    const numCampaigns = await prisaleContract.methods.numCampaigns().call({ from: accounts[0] });
+    /*const numCampaigns = await stakerContract.methods.numCampaigns().call({ from: accounts[0] });
     const campaigns = [];
     for (let i = 0; i < numCampaigns; i ++) {
       let c = await getUserCampaignData(i);
       campaigns.push(c);
     }
     setCampaigns(campaigns);
-    console.log(campaigns);
+    console.log(campaigns);*/
   }
 
   async function getUserCampaignData(cId) {
-    const campaignData = await prisaleContract.methods.getFrontendView(cId).call({ from: accounts[0] });
+    const campaignData = await stakerContract.methods.getFrontendView(cId).call({ from: accounts[0] });
     const tokenPrice = campaignData["_price"];
     const userBought = campaignData["_userBought"];
     const name = campaignData["_name"];
@@ -154,14 +154,14 @@ function App() {
 
   async function Temp() {
     const cId = 0;
-    console.log(prisaleContract);
-    const res = await prisaleContract.methods.numCampaigns().call({ from: accounts[0] });
+    console.log(stakerContract);
+    const res = await stakerContract.methods.numCampaigns().call({ from: accounts[0] });
     console.log(res);
     console.log(owner);
     console.log(accounts[0]);
    
-    /*const totalBought = await prisaleContract.methods.getPoolTotalAllocation(cId).call({ from: accounts[0] });
-    const name = await prisaleContract.methods.getCampaignName(cId).call();
+    /*const totalBought = await stakerContract.methods.getPoolTotalAllocation(cId).call({ from: accounts[0] });
+    const name = await stakerContract.methods.getCampaignName(cId).call();
     const campaign = {id: cId, name: name, bought: userBought, total: totalBought };
     setCampaigns([campaign]);
     console.log(campaigns);
@@ -177,7 +177,7 @@ function App() {
 
   async function getTokensBalance() {
     const mockAccounts=["0x1d3d35F5A4065753F35bad06239cfB3ACc3a2454", "0xEdA98aB9e5a1E853EA7aE3CDf15B2e6d6Ed3F455", "0x2Ef668067FbA6215149715102EE0631e7333EcDD"];
-    mockAccounts.push(prisaleContract.options.address);
+    mockAccounts.push(stakerContract.options.address);
     const tokens = (await erc20Factory.methods.getTokens().call({ from: accounts[0] }));
     const tokenContracts = [];
     const balances = [["Address"]];
@@ -203,11 +203,11 @@ function App() {
   async function endPresale(cId) {
     const tokens = (await erc20Factory.methods.getTokens().call({ from: accounts[0] }));
     const tokContract = new web3.eth.Contract(MockERC20Contract.abi, tokens[cId+1]);
-    await prisaleContract.methods.endPresale(cId).send({ from: accounts[0] });
-    await prisaleContract.methods.setCampaignToken(cId, tokens[cId+1], 420).send({ from: accounts[0] });
+    await stakerContract.methods.endPresale(cId).send({ from: accounts[0] });
+    await stakerContract.methods.setCampaignToken(cId, tokens[cId+1], 420).send({ from: accounts[0] });
     
     const myBalance = await tokContract.methods.balanceOf(accounts[0]).call({ from: accounts[0] });
-    await tokContract.methods.transfer(prisaleContract.options.address, "5000000000000000000").send({ from: accounts[0] });
+    await tokContract.methods.transfer(stakerContract.options.address, "5000000000000000000").send({ from: accounts[0] });
 
     getTokensBalance();
     getCampaignsData();
@@ -216,7 +216,7 @@ function App() {
   async function addCamapign() {
     const name = prompt("enter name");
     const price = prompt("enter price per token");
-    await prisaleContract.methods.addCampaign(name, price).send({ from: accounts[0] });
+    await stakerContract.methods.addCampaign(name, price).send({ from: accounts[0] });
 
     getCampaignsData();
   }
@@ -236,11 +236,35 @@ function App() {
   }
 
   async function userClaim(cId) {
-    await prisaleContract.methods.claim(cId).send({ from: accounts[0] });
+    await stakerContract.methods.claim(cId).send({ from: accounts[0] });
 
     getTokensBalance();
     getCampaignsData();
   }
+
+  async function deposit(_amount) {
+    let amount = web3.utils.toWei("10");
+    let depositTokenAddr = await stakerContract.methods.depositToken().call({ from: accounts[0] });
+    const depositContract = new web3.eth.Contract(MockERC20Contract.abi, depositTokenAddr);
+    const txResult = await depositContract.methods.approve(stakerContract.options.address, amount.toString()).send({ from: accounts[0] });
+    const t = await stakerContract.methods.deposit(amount).send({ from: accounts[0] });
+    await getTokensBalance();
+  }
+
+  async function getTimes(_amount) {
+    let t = await stakerContract.methods.getTime().call({ from: accounts[0] });
+    console.log(t);
+    t = await stakerContract.methods.rewardPeriodEndTimestamp().call({ from: accounts[0] });
+    console.log(t);
+    await getTokensBalance();
+  }
+
+  async function withdraw(_amount) {
+    let amount = web3.utils.toWei("10");
+    const t = await stakerContract.methods.withdraw(amount).send({ from: accounts[0] });
+    await getTokensBalance();
+  }
+  
 
 
   const CampaignDetails = () => (
@@ -321,24 +345,22 @@ function App() {
   }
   return (
     <div className="App">
-      <BlockchainContext.Provider value={{web3, accounts, prisaleContract}}>
-        <h1>Token Presales</h1>
+      <BlockchainContext.Provider value={{web3, accounts, stakerContract}}>
+        <h1>Eat The Stake</h1>
           <ChildComponent>
 
           </ChildComponent>
         <div>
-        <CampaignDetails />
         <hr />
         Loaded ETH address: <b>{accounts && accounts[0]?accounts[0] : undefined}</b><br/>
-        Loaded Prisale address: <b>{prisaleContract?prisaleContract.options.address : undefined}</b><br/><br/>
+        Loaded Staker address: <b>{stakerContract?stakerContract.options.address : undefined}</b><br/><br/>
 
         <b>Dev dashboard</b><br/><br/>
           <Button onClick={getCampaignsData} variant="secondary">Update campaigns manually</Button>{' '}
           <Button onClick={getTokensBalance} variant="secondary">Get Tokens Balance</Button>{' '}
-          <Button onClick={endPresale} variant="secondary">End Presale</Button>{' '}
-          <Button onClick={userClaim} variant="secondary">User Claim</Button>{' '}
-          <Button onClick={Temp} variant="secondary">Temp</Button>{' '}
-          <Button onClick={addCamapign} variant="secondary">Add campaign</Button>{' '}
+          <Button onClick={deposit} variant="secondary">Deposit</Button>{' '}
+          <Button onClick={withdraw} variant="secondary">Withdraw</Button>{' '}
+          <Button onClick={getTimes} variant="secondary">Times</Button>{' '}
           <br /><br />
           {(tokenBalances && tokenBalances.length>0)?<BalancesTable /> : undefined}
         </div>

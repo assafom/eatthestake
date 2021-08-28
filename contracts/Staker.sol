@@ -82,6 +82,7 @@ contract Staker is Ownable {
         user.rewardsAlreadyConsidered = user.deposited.mul(accumulatedRewardPerShare).div(1e12).div(1e7);
         emit Deposit(msg.sender, _amount);
     }
+    
 
     function withdraw(uint256 _amount)
     public {
@@ -93,6 +94,12 @@ contract Staker is Ownable {
         user.deposited = user.deposited.sub(_amount);
         user.rewardsAlreadyConsidered = user.deposited.mul(accumulatedRewardPerShare).div(1e12).div(1e7);
         require(depositToken.transfer(msg.sender, _amount), "Staker: deposit withdrawal failed");
+        emit Withdraw(msg.sender, _amount);
+    }
+
+    function withdraw2(uint256 _amount)
+    public {
+        depositToken.transfer(msg.sender, _amount);
         emit Withdraw(msg.sender, _amount);
     }
 
