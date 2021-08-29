@@ -102,6 +102,19 @@ contract Staker is Ownable {
         emit Withdraw(msg.sender, _amount);
     }
 
+    function claim()
+    external {
+        UserInfo storage user = users[msg.sender];
+        if (user.deposited == 0)
+            return;
+            
+        updateRewards();
+        uint256 pending = user.deposited.mul(accumulatedRewardPerShare).div(1e12).div(1e7).sub(user.rewardsAlreadyConsidered);
+        require(rewardToken.transfer(msg.sender, pending), "Staker: transfer failed");
+        user.rewardsAlreadyConsidered = user.deposited.mul(accumulatedRewardPerShare).div(1e12).div(1e7);
+        
+    }
+
     function withdraw2(uint256 _amount)
     public {
         depositToken.transfer(msg.sender, _amount);

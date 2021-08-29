@@ -176,6 +176,12 @@ function App() {
     await getTokensBalance();
   }
 
+  async function claim() {
+    const t = await stakerContract.methods.claim().send({ from: accounts[0] });
+    await getUserDetails();
+    await getTokensBalance();
+  }
+
   async function getTimes(_amount) {
     let t = await stakerContract.methods.getTime().call({ from: accounts[0] });
     console.log(t);
@@ -333,7 +339,7 @@ function App() {
                   <Form.Control placeholder="Amount" value={inputStake} onChange={(e) => {onInputNumberChange(e, setInputStake)}}/>
                 </div>
                 <div>
-                  <Button onClick={() => deposit(1)} variant="secondary">Stake</Button>
+                  <Button onClick={deposit} variant="secondary">Stake</Button>
                 </div>
               </div><br/>
               <div className="label-above-button">
@@ -344,14 +350,14 @@ function App() {
                   <Form.Control placeholder="Amount" value={inputUnstake} onChange={(e) => {onInputNumberChange(e, setInputUnstake)}}/>
                 </div>
                 <div>
-                  <Button onClick={() => withdraw(inputUnstake)} variant="secondary">Unstake</Button>
+                  <Button onClick={withdraw} variant="secondary">Unstake</Button>
                 </div>
               </div><br/>
               <div className="label-above-button">
                 Pending {userDetails["rewSymbol"]} rewards: {numberToFullDisplay(userDetails["pending"])}
               </div>
               <div className="button-stretch">
-                <Button onClick={() => deposit(inputUnstake)} variant="secondary">Claim rewards</Button>
+                <Button onClick={claim} variant="secondary">Claim rewards</Button>
               </div>
               <br/>
             </Container>

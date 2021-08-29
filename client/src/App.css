@@ -17,25 +17,6 @@ body {
 
 }
 
-.App-logo {
-  height: 40vmin;
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #09d3ac;
-}
-
 hr {
   margin: 0.75rem 0;
   height: 0.03rem !important;
@@ -113,30 +94,9 @@ hr {
   padding-bottom: 15px;
   box-shadow: 0px 0px 10px 0px rgb(0 0 0 / 50%);
 }
-.main-buttons-div button:focus , button:active {
+
+button:focus , button:active {
   box-shadow: 0px 0px 10px 0px rgb(0 0 0 / 50%) !important;
-}
-
-
-.navbar-brand img {
-  margin: auto;
-}
-
-.navbar .container {
-  margin-left: initial;
-}
-
-.navbar-text {
-  font-weight: 800;
-  font-size: 25px;
-  margin: auto;
-  margin-left: 18px;
-  color: white !important;
-}
-
-h1 {
-  font-size: 56px;
-  font-weight: 800;
 }
 
 
@@ -146,17 +106,6 @@ h1 {
   justify-content: center;
 }
 
-.campaigns .card {
-  margin: 20px;
-  margin-bottom: auto;
-  text-align: left;
-  padding: 20px;
-  background: aliceblue;
-}
-
-.button-span button {
-  width: 100%;
-}
 
 .input-button-container {
   display: flex;
@@ -174,9 +123,18 @@ h1 {
   /*text-shadow: 2px 2px 4px darkgrey;*/
 }
 
+
+.input-button-container div:nth-of-type(1) {
+  flex-grow: 4;
+}
+
 .input-button-container div:nth-of-type(1) .form-control:focus {
   border-color: #ced4da;
   /*box-shadow: none;*/
+}
+
+.input-button-container div:nth-of-type(2) {
+  margin-left: auto;
 }
 
 .input-button-container div:nth-of-type(2) .btn {
@@ -187,12 +145,4 @@ h1 {
   font-size: 18px;
   font-weight: 600;
   box-shadow: 0px 0px 10px 0px rgb(0 0 0 / 50%);
-}
-
-.input-button-container div:nth-of-type(1) {
-  flex-grow: 4;
-}
-
-.input-button-container div:nth-of-type(2) {
-  margin-left: auto;
 }
