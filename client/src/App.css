@@ -146,3 +146,25 @@ button:focus , button:active {
   font-weight: 600;
   box-shadow: 0px 0px 10px 0px rgb(0 0 0 / 50%);
 }
+
+.time-left-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /*width: 86%;*/
+  margin: auto;
+  margin-left: 5%;
+  margin-right: 1%;
+}
+
+.time {
+  display: flex;
+  flex-grow: 1;
+  justify-content: flex-end;
+}
+
+.time >div {
+  width: 25%;
+  display: flex;
+  flex-direction: column;
+}

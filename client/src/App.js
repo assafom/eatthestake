@@ -340,8 +340,41 @@ function App() {
           <div style={{display: 'flex'}}>
             <Container className="square inner-container">
               <br/>
+              <div className="time-left-label">
+                <div>
+                  Time Left
+                </div>
+                <div className="time">
+                  <div>
+                    <div>
+                      14
+                    </div>
+                    <div>
+                      days
+                    </div>
+                  </div>
+                  <div>
+                    <div>
+                      23
+                    </div>
+                    <div>
+                      hours
+                    </div>
+                  </div>
+                  <div>
+                    <div>
+                      58
+                    </div>
+                    <div>
+                      mins
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <hr/>
+
               <CardKeyValue label="Global rewards per day" value={numberToFixed(userDetails["rewardPerSecond"])} />
-              <CardKeyValue label="Days left" value={numberToFixed(userDetails["daysLeft"])} />
+              
               <CardKeyValue label="Your staked" value={numberToFixed(userDetails["deposited"])} />
               <CardKeyValue label="Your pending rewards" value={numberToFixed(userDetails["pending"])} />
               
