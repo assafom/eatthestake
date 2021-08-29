@@ -85,12 +85,12 @@ function App() {
         // Set web3, accounts, and contract to the state, and then proceed with an
         // example of interacting with the contract's methods.
         setWeb3(web3);
+        setOwner(await instance.methods.owner().call({ from: accounts[0] }));
         setAccounts(accounts);
         setStakerContract(instance);
         setErc20Factory(erc20Factoryinstance);
         setDepositTokenContract(depositContract);
         setRewardTokenContract(rewardContract);
-        setOwner(await instance.methods.owner().call({ from: accounts[0] }));
 
         window.ethereum.on('accountsChanged', function (_accounts) {
           setAccounts(_accounts);
@@ -195,6 +195,10 @@ function App() {
     console.log(t);
     console.log(inputStake);
     console.log(inputUnstake);
+    console.log("new");
+    console.log(accounts[0].toLowerCase() === owner.toLowerCase());
+    console.log(accounts[0]);
+    console.log(owner);
     await getTokensBalance();
   }
 
@@ -263,6 +267,18 @@ function App() {
     </>
   );
 
+  const AdminPanel = () => (
+    <>
+      <Container className="square inner-container">
+        <br/>
+        Admin
+        <hr/><br/>
+        Add rewards
+        <br/>
+      </Container>
+    </>
+  )
+
 
   const Nav2 = () => (
     <>
@@ -321,7 +337,7 @@ function App() {
         <BlockchainContext.Provider value={{web3, accounts, stakerContract}}>
           
           <br/>
-          <div>
+          <div style={{display: 'flex'}}>
             <Container className="square inner-container">
               <br/>
               <CardKeyValue label="Global rewards per day" value={numberToFixed(userDetails["rewardPerSecond"])} />
@@ -361,6 +377,7 @@ function App() {
               </div>
               <br/>
             </Container>
+            {(accounts && accounts[0].toLowerCase() == owner.toLowerCase())? <AdminPanel/> : undefined}
           </div>
           <div>
             <br/>
