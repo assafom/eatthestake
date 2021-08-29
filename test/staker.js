@@ -46,7 +46,7 @@ contract("Staker", async accounts => {
     temp = await staker.pendingRewards.call(accounts[1], { from: accounts[0] });
     console.log("p account1 after 15 : " + web3.utils.toWei(temp));*/
 
-    temp = await staker.withdraw.call(web3.utils.toWei("10"), { from: accounts[1] });
+    temp = await staker.withdraw2.call(web3.utils.toWei("10"), { from: accounts[1] });
     temp = await rewardToken.balanceOf.call(accounts[1], { from: accounts[1] });
     console.log("account1 reward at end : " + (temp).toString());
     temp2 = await depositToken.balanceOf.call(accounts[1], { from: accounts[1] });
