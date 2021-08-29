@@ -233,8 +233,8 @@ function App() {
           <img
             alt=""
             src={require('./logo.png')}
-            width="410"
-            height="40"
+            width="300px"
+            height="27px"
             className="d-inline-block align-top"
           />
         </div>
@@ -282,8 +282,8 @@ function App() {
       <div className="App">
         <BlockchainContext.Provider value={{web3, accounts, stakerContract}}>
           
-          <br/><br/>
-          <div style={{display: "flex"}}>
+          <br/>
+          <div>
             <Container className="square inner-container">
               <br/>
               <CardKeyValue label="Global rewards per day" value={userDetails["rewardPerSecond"]} />

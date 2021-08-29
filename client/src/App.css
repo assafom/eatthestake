@@ -1,6 +1,6 @@
 .App {
   text-align: center;
-  width: 1100px;
+  max-width: 1100px;
   margin: auto;
   
 
@@ -36,6 +36,11 @@ body {
   color: #09d3ac;
 }
 
+hr {
+  margin: 0.75rem 0;
+  height: 0.03rem !important;
+}
+
 .minimalistic-nav-bar {
   display: flex;
   background-color: #212529;
@@ -47,51 +52,44 @@ body {
 }
 
 .minimalistic-nav-bar div:nth-of-type(2) {
-  font-size: 28px;
+  font-size: 20px;
   font-weight: 800;
   text-shadow: 1px 1px 2px black, 0 0 25px cyan, 0 0 5px darkcyan;
 }
 
 .minimalistic-nav-bar div:nth-of-type(3) {
-  width: 410px;
+  width: 300px;
   text-align: end;
   margin-right: .2rem;
   font-weight: 400;
-  font-size: 20px;
+  font-size: 16px;
   align-items: center;
   display: flex;
   justify-content: flex-end;
 }
 
-.navbar-brand {
-  display: flex;
-}
-
-.navbar-expand {
-  justify-content: space-between !important;
-}
-
 .inner-container {
   /*color: black;*/
+  margin-top: 10px;
   color: #33D3D2;
   background-color: #212529;
-  width: 50%;
+  width: 38%;
   border-radius: 20px;
-  font-size: 24px;
+  font-size: 18px;
   font-weight: 600;
   box-shadow: 0px 0px 30px 0px rgb(0 0 0 / 50%);
 }
 
 .button-stretch button {
   border-radius: 15px;
-  font-size: 24px;
+  font-size: 18px;
   font-weight: 600;
   box-shadow: 0px 0px 10px 0px rgb(0 0 0 / 50%);
   width: 90%;
 }
 
 .label-above-button {
-  font-size: 16px;
+  font-size: 12px;
   text-align: start;
   width: 90%;
   margin: auto;
@@ -109,7 +107,7 @@ body {
 .main-buttons-div button {
   width: 40%;
   border-radius: 10px;
-  font-size: 24px;
+  font-size: 18px;
   font-weight: 600;
   padding-top: 15px;
   padding-bottom: 15px;
@@ -171,7 +169,7 @@ h1 {
   border-bottom-left-radius: 15px;
   border-top-right-radius: 0px;
   border-bottom-right-radius: 0px;
-  font-size: 24px;
+  font-size: 18px;
   box-shadow: 0px 0px 10px 0px rgb(0 0 0 / 50%);
   /*text-shadow: 2px 2px 4px darkgrey;*/
 }
@@ -186,7 +184,7 @@ h1 {
   border-bottom-right-radius: 15px;
   border-top-left-radius: 0px;
   border-bottom-left-radius: 0px;
-  font-size: 24px;
+  font-size: 18px;
   font-weight: 600;
   box-shadow: 0px 0px 10px 0px rgb(0 0 0 / 50%);
 }
