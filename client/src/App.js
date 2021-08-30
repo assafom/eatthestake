@@ -30,13 +30,19 @@ function App() {
   const [userDetails, setUserDetails] = useState({});
   const [owner, setOwner] = useState(undefined);
 
+  const [isGlobalLoading, setIsGlobalLoading] = useState(true);
+  const [isConnectingToWallet, setIsConnectingToWallet] = useState(false);
+  const [connectButtonMessage, setConnectButtonMessage] = useState("Connect");
+
   const TOKENDECIMALS = 18;
 
 
   useEffect(() => {
     (async () => {
       // SET TO LOADING
+      setIsGlobalLoading(false);
       window.addEventListener("load", async () => {
+        //alert("2")
         try {
           //await window.ethereum.request({ method: 'eth_requestAccounts' });
           //initConnection();
@@ -86,9 +92,12 @@ function App() {
 
   async function initConnection() {
     try {
+      
       // Get network provider and web3 instance.
+      setIsConnectingToWallet(true);
+      setConnectButtonMessage("Please approve wallet connection...");
       const web3 = await connectToWallet();
-
+      setIsGlobalLoading(true);
       // Use web3 to get the user's accounts.
       //const accounts = await web3.eth.getAccounts();
       const accounts = await window.ethereum.request({ method: 'eth_accounts' });
@@ -152,6 +161,10 @@ function App() {
         `Failed to load web3, accounts, or contract. Check console for details.`,
       );
       console.error(error);
+    } finally {
+      setIsGlobalLoading(false);
+      setIsConnectingToWallet(false);
+      setConnectButtonMessage("Connect");
     }
   }
   
@@ -273,7 +286,7 @@ function App() {
           STAKE
         </div>
         <div>
-          {web3? <AddressView />: undefined}
+          {web3? <AddressView />: ' '}
           
         </div>
       </div>
@@ -338,22 +351,25 @@ function App() {
     </>
   );
 
-/*
-  if (typeof web3 === 'undefined') {
+  if (isGlobalLoading) {
     return (
-    <>
-      <div>
-        <Button onClick={initConnection}>Connect</Button>
+      <>
+      <div className="outerApp">
+        <Nav2 />
+        <div className="App">
+          <br/>
+          Loading...
+        </div>
       </div>
-    </>
+      </>
     )
-  }*/ 
+  }
 
   return (
     <div className="outerApp">
       <Nav2 />
       <div className="App">
-        {web3? <MainView /> : <Button onClick={initConnection}>Connect</Button> }
+        {web3? <MainView /> : <div><br/><Button onClick={initConnection} disabled={isConnectingToWallet}>{connectButtonMessage}</Button></div> }
       </div>
     </div>
     
