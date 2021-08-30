@@ -38,8 +38,8 @@ function App() {
       // SET TO LOADING
       window.addEventListener("load", async () => {
         try {
-          await window.ethereum.request({ method: 'eth_requestAccounts' });
-          initConnection();
+          //await window.ethereum.request({ method: 'eth_requestAccounts' });
+          //initConnection();
         }
         catch(e) {
 
@@ -273,9 +273,16 @@ function App() {
           STAKE
         </div>
         <div>
-          Connected: {accounts? accounts[0].substring(0,6) : undefined}...{accounts? accounts[0].substring(accounts[0].length-4,accounts[0].length) : undefined}
+          {web3? <AddressView />: undefined}
+          
         </div>
       </div>
+    </>
+  )
+
+  const AddressView = () => (
+    <>
+    Connected: {accounts? accounts[0].substring(0,6) : undefined}...{accounts? accounts[0].substring(accounts[0].length-4,accounts[0].length) : undefined}
     </>
   )
 
@@ -303,7 +310,35 @@ function App() {
     </>
   );
 
+  const MainView = () => (
+    <>
+      <BlockchainContext.Provider value={{web3, accounts, stakerContract, rewardTokenContract, depositTokenContract}}>
+      <DisplayContext.Provider value={{userDetails, refreshUserDetails, numberToFullDisplay, onInputNumberChange}}>
+        
+        <br/>
+        <div style={{display: 'flex'}}>
+          <UserPanel />
+          {(accounts && accounts[0].toLowerCase() == owner.toLowerCase())? <AdminPanel /> : undefined}
+        </div>
+        <div>
+          <br/>
+          <hr />
+          <br/>
+          Loaded ETH address: <b>{accounts && accounts[0]?accounts[0] : undefined}</b><br/>
+          Loaded Staker address: <b>{stakerContract?stakerContract.options.address : undefined}</b><br/><br/>
 
+          <b>Dev dashboard</b><br/><br/>
+          <Button onClick={getTokensBalance} variant="secondary">Get Tokens Balance</Button>{' '}
+          <Button onClick={getTimes} variant="secondary">Deets</Button>{' '}
+          <br /><br />
+          {(tokenBalances && tokenBalances.length>0)?<BalancesTable /> : undefined}
+        </div>
+      </DisplayContext.Provider>
+      </BlockchainContext.Provider>
+    </>
+  );
+
+/*
   if (typeof web3 === 'undefined') {
     return (
     <>
@@ -312,35 +347,13 @@ function App() {
       </div>
     </>
     )
-  }
+  }*/ 
 
   return (
     <div className="outerApp">
       <Nav2 />
       <div className="App">
-        <BlockchainContext.Provider value={{web3, accounts, stakerContract, rewardTokenContract, depositTokenContract}}>
-        <DisplayContext.Provider value={{userDetails, refreshUserDetails, numberToFullDisplay, onInputNumberChange}}>
-          
-          <br/>
-          <div style={{display: 'flex'}}>
-            <UserPanel />
-            {(accounts && accounts[0].toLowerCase() == owner.toLowerCase())? <AdminPanel /> : undefined}
-          </div>
-          <div>
-            <br/>
-            <hr />
-            <br/>
-            Loaded ETH address: <b>{accounts && accounts[0]?accounts[0] : undefined}</b><br/>
-            Loaded Staker address: <b>{stakerContract?stakerContract.options.address : undefined}</b><br/><br/>
-
-            <b>Dev dashboard</b><br/><br/>
-            <Button onClick={getTokensBalance} variant="secondary">Get Tokens Balance</Button>{' '}
-            <Button onClick={getTimes} variant="secondary">Deets</Button>{' '}
-            <br /><br />
-            {(tokenBalances && tokenBalances.length>0)?<BalancesTable /> : undefined}
-          </div>
-        </DisplayContext.Provider>
-        </BlockchainContext.Provider>
+        {web3? <MainView /> : <Button onClick={initConnection}>Connect</Button> }
       </div>
     </div>
     
