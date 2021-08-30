@@ -9,14 +9,17 @@ export default function TimeLeftField() {
 
 
     function extractTime(part) {
-        let daysLeft = userDetails["daysLeft"];
-        if (part === "d")
-          return Math.floor(daysLeft);
-        if (part === "h")
-          return Math.floor((daysLeft - Math.floor(daysLeft)) * 24);
-        if (part === "m")
-          return Math.floor((daysLeft - Math.floor(daysLeft) - Math.floor(daysLeft - Math.floor(daysLeft))) * 60);
-        return undefined;
+      if (userDetails["daysLeft"] === undefined)
+        return "";
+        
+      let daysLeft = userDetails["daysLeft"];
+      if (part === "d")
+        return Math.floor(daysLeft);
+      if (part === "h")
+        return Math.floor((daysLeft - Math.floor(daysLeft)) * 24);
+      if (part === "m")
+        return Math.floor((daysLeft - Math.floor(daysLeft) - Math.floor(daysLeft - Math.floor(daysLeft))) * 60);
+      return undefined;
       }
 
     return (

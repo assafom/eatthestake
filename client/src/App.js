@@ -100,7 +100,7 @@ function App() {
 
   useEffect(() => {
     const load = async() => { 
-      await getUserDetails();
+      await refreshUserDetails();
       await getTokensBalance();
     }
 
@@ -162,8 +162,7 @@ function App() {
     await getTokensBalance();
   }
 
-  async function getUserDetails() {
-    console.log(accounts[0]);
+  async function refreshUserDetails() {
     let res = await stakerContract.methods.getFrontendView().call({ from: accounts[0] });
     let depBalance = await depositTokenContract.methods.balanceOf(accounts[0]).call({ from: accounts[0] });
     let rewardBalance = await rewardTokenContract.methods.balanceOf(accounts[0]).call({ from: accounts[0] });
@@ -179,13 +178,11 @@ function App() {
       , rewardTokenBalance: (rewardBalance/10**18)
       , depSymbol: depSymbol
       , rewSymbol: rewSymbol }
-    console.log(res);
-    console.log(parsed);
+
     setUserDetails(parsed);
   }
 
   function onInputNumberChange(e, f) {
-    //const re = /^[0-9\b]+$/;
     const re = new RegExp('^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$')
     if (e.target.value === '' || re.test(e.target.value)) {
       f(e.target.value);
@@ -258,7 +255,7 @@ function App() {
       <Nav2 />
       <div className="App">
         <BlockchainContext.Provider value={{web3, accounts, stakerContract, rewardTokenContract, depositTokenContract}}>
-        <DisplayContext.Provider value={{userDetails, getUserDetails, numberToFullDisplay, onInputNumberChange}}>
+        <DisplayContext.Provider value={{userDetails, refreshUserDetails, numberToFullDisplay, onInputNumberChange}}>
           
           <br/>
           <div style={{display: 'flex'}}>
