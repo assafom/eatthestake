@@ -6,14 +6,14 @@ var MockERC20 = artifacts.require("./MockERC20.sol");
 
 contract("Staker", async accounts => {
 
-    /*beforeEach(async() => {
+    beforeEach(async() => {
         let snapshot = await timeMachine.takeSnapshot();
         snapshotId = snapshot['result'];
     });
 
     afterEach(async() => {
         await timeMachine.revertToSnapshot(snapshotId);
-    });*/
+    });
 
 
     it("should init the values", async () => {
@@ -26,9 +26,9 @@ contract("Staker", async accounts => {
     const depositToken = await MockERC20.at(depositTokenAddr);
     const rewardToken = await MockERC20.at(rewardTokenAddr);
 
-    await rewardToken.approve(staker.address, rewardAmount, { from: accounts[0] });
+    //await rewardToken.approve(staker.address, rewardAmount, { from: accounts[0] });
 
-    await staker.addRewards(rewardAmount, 30);
+    //await staker.addRewards(rewardAmount, 30);
     temp = await staker.rewardPeriodEndTimestamp.call();
     console.log("ending timestamp :" + temp.toString());
 
@@ -41,12 +41,12 @@ contract("Staker", async accounts => {
     let bbefore = await staker.pendingRewards.call(accounts[1], { from: accounts[1] });
     console.log("pending rewards after init deposit: " + (bbefore).toString());
 
-    /*await timeMachine.advanceTimeAndBlock(60*60*24*15);
+    await timeMachine.advanceTimeAndBlock(60*60*24*15);
     console.log("adv 15, current timestamp :" + (await staker.getTime.call()).toString());
     temp = await staker.pendingRewards.call(accounts[1], { from: accounts[0] });
-    console.log("p account1 after 15 : " + web3.utils.toWei(temp));*/
+    console.log("p account1 after 15 : " + web3.utils.toWei(temp));
 
-    temp = await staker.withdraw2.call(web3.utils.toWei("10"), { from: accounts[1] });
+    temp = await staker.withdraw.call(web3.utils.toWei("10"), { from: accounts[1] });
     temp = await rewardToken.balanceOf.call(accounts[1], { from: accounts[1] });
     console.log("account1 reward at end : " + (temp).toString());
     temp2 = await depositToken.balanceOf.call(accounts[1], { from: accounts[1] });

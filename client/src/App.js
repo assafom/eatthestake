@@ -4,7 +4,9 @@ import ERC20FactoryContract from "./contracts/ERC20Factory.json";
 import MockERC20Contract from "./contracts/MockERC20.json";
 import getWeb3 from "./getWeb3";
 import BlockchainContext from "./BlockchainContext.js";
+import DisplayContext from "./DisplayContext.js";
 import ChildComponent from "./ChildComponent";
+import AdminPanel from "./AdminPanel";
 
 import Button from 'react-bootstrap/Button';
 import Table from 'react-bootstrap/Table';
@@ -38,6 +40,9 @@ function App() {
   const [owner, setOwner] = useState(undefined);
   const [inputStake, setInputStake] = useState('');
   const [inputUnstake, setInputUnstake] = useState('');
+
+  const [inputAdminRewards, setInputAdminRewards] = useState('');
+  const [inputAdminDuration, setInputAdminDuration] = useState('');
 
   const TOKENDECIMALS = 18;
 
@@ -207,6 +212,7 @@ function App() {
     console.log(accounts[0]);
     let res = await stakerContract.methods.getFrontendView().call({ from: accounts[0] });
     let depBalance = await depositTokenContract.methods.balanceOf(accounts[0]).call({ from: accounts[0] });
+    let rewardBalance = await rewardTokenContract.methods.balanceOf(accounts[0]).call({ from: accounts[0] });
     let depSymbol = await depositTokenContract.methods.symbol().call({ from: accounts[0] });
     let rewSymbol = await rewardTokenContract.methods.symbol().call({ from: accounts[0] });
     //uint256 _rewardPerSecond, uint256 _secondsLeft, uint256 _deposited, uint256 _pending) {
@@ -216,6 +222,7 @@ function App() {
       , deposited: (res["_deposited"]/10**18)
       , pending: (res["_pending"]/10**18)
       , depositTokenBalance: (depBalance/10**18)
+      , rewardTokenBalance: (rewardBalance/10**18)
       , depSymbol: depSymbol
       , rewSymbol: rewSymbol }
     console.log(res);
@@ -223,24 +230,12 @@ function App() {
     setUserDetails(parsed);
   }
 
-
-  async function addRewards(_amount) {
-    let amount = web3.utils.toWei("10");
-    let days = 15;
-    const txResult = await rewardTokenContract.methods.approve(stakerContract.options.address, amount.toString()).send({ from: accounts[0] });
-    const t = await stakerContract.methods.addRewards(amount, days).send({ from: accounts[0] });
-    await getUserDetails();
-    await getTokensBalance();
-  }
-
   function onInputNumberChange(e, f) {
-    console.log(e.target.value);
     //const re = /^[0-9\b]+$/;
     const re = new RegExp('^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$')
     if (e.target.value === '' || re.test(e.target.value)) {
       f(e.target.value);
     }
-    console.log(inputStake);
   }
 
   function numberToFullDisplay(n) {
@@ -279,17 +274,6 @@ function App() {
     </>
   );
 
-  const AdminPanel = () => (
-    <>
-      <Container className="square inner-container">
-        <br/>
-        Admin
-        <hr/><br/>
-        Add rewards
-        <br/>
-      </Container>
-    </>
-  )
 
 
   const Nav2 = () => (
@@ -383,7 +367,8 @@ function App() {
     <div className="outerApp">
       <Nav2 />
       <div className="App">
-        <BlockchainContext.Provider value={{web3, accounts, stakerContract}}>
+        <BlockchainContext.Provider value={{web3, accounts, stakerContract, rewardTokenContract}}>
+        <DisplayContext.Provider value={{userDetails, getUserDetails, numberToFullDisplay, onInputNumberChange}}>
           
           <br/>
           <div style={{display: 'flex'}}>
@@ -429,7 +414,7 @@ function App() {
               </div>
               <br/>
             </Container>
-            {(accounts && accounts[0].toLowerCase() == owner.toLowerCase())? <AdminPanel/> : undefined}
+            {(accounts && accounts[0].toLowerCase() == owner.toLowerCase())? <AdminPanel /> : undefined}
           </div>
           <div>
             <br/>
@@ -442,11 +427,11 @@ function App() {
             <Button onClick={getTokensBalance} variant="secondary">Get Tokens Balance</Button>{' '}
             <Button onClick={deposit} variant="secondary">Deposit</Button>{' '}
             <Button onClick={withdraw} variant="secondary">Withdraw</Button>{' '}
-            <Button onClick={addRewards} variant="secondary">Add rewards</Button>{' '}
             <Button onClick={getTimes} variant="secondary">Deets</Button>{' '}
             <br /><br />
             {(tokenBalances && tokenBalances.length>0)?<BalancesTable /> : undefined}
           </div>
+        </DisplayContext.Provider>
         </BlockchainContext.Provider>
       </div>
     </div>

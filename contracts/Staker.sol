@@ -107,7 +107,7 @@ contract Staker is Ownable {
         UserInfo storage user = users[msg.sender];
         if (user.deposited == 0)
             return;
-            
+
         updateRewards();
         uint256 pending = user.deposited.mul(accumulatedRewardPerShare).div(1e12).div(1e7).sub(user.rewardsAlreadyConsidered);
         require(rewardToken.transfer(msg.sender, pending), "Staker: transfer failed");
@@ -143,9 +143,10 @@ contract Staker is Ownable {
 
     function getFrontendView()
     external view returns (uint256 _rewardPerSecond, uint256 _secondsLeft, uint256 _deposited, uint256 _pending) {
-        _rewardPerSecond = rewardPerSecond.div(1e7);
-        if (block.timestamp <= rewardPeriodEndTimestamp)
-            _secondsLeft = rewardPeriodEndTimestamp.sub(block.timestamp); // else, defaults to 0
+        if (block.timestamp <= rewardPeriodEndTimestamp) { // else, defaults to 0
+            _secondsLeft = rewardPeriodEndTimestamp.sub(block.timestamp); 
+            _rewardPerSecond = rewardPerSecond.div(1e7);
+        }
         _deposited = users[msg.sender].deposited;
         _pending = pendingRewards(msg.sender);
     }
