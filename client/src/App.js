@@ -1,48 +1,33 @@
 import React, { useState, useEffect } from "react";
+import getWeb3 from "./getWeb3";
+
 import StakerContract from "./contracts/Staker.json";
 import ERC20FactoryContract from "./contracts/ERC20Factory.json";
 import MockERC20Contract from "./contracts/MockERC20.json";
-import getWeb3 from "./getWeb3";
-import BlockchainContext from "./BlockchainContext.js";
-import DisplayContext from "./DisplayContext.js";
-import ChildComponent from "./ChildComponent";
-import AdminPanel from "./AdminPanel";
+
+import BlockchainContext from "./context/BlockchainContext.js";
+import DisplayContext from "./context/DisplayContext.js";
+
+import AdminPanel from "./components/AdminPanel";
+import UserPanel from "./components/UserPanel";
 
 import Button from 'react-bootstrap/Button';
 import Table from 'react-bootstrap/Table';
-import Card from 'react-bootstrap/Card';
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
-import Tooltip from 'react-bootstrap/Tooltip';
-import FormControl from 'react-bootstrap/FormControl';
-import Form from 'react-bootstrap/Form';
-import Container from 'react-bootstrap/Container';
-
-
 
 import "./App.css";
 
-//function App =() => {
 function App() {
   const [web3, setWeb3] = useState(undefined);
   const [accounts, setAccounts] = useState(undefined);
   const [stakerContract, setStakerContract] = useState(undefined);
   const [depositTokenContract, setDepositTokenContract] = useState(undefined);
   const [rewardTokenContract, setRewardTokenContract] = useState(undefined);
-
   const [erc20Factory, setErc20Factory] = useState(undefined);
-
-  const [campaigns, setCampaigns] = useState([]);
 
   const [tokenBalances, setTokenBalances] = useState([]);
 
-  const [buyTokensInput, setBuyTokensInput] = useState({});
   const [userDetails, setUserDetails] = useState({});
   const [owner, setOwner] = useState(undefined);
-  const [inputStake, setInputStake] = useState('');
-  const [inputUnstake, setInputUnstake] = useState('');
-
-  const [inputAdminRewards, setInputAdminRewards] = useState('');
-  const [inputAdminDuration, setInputAdminDuration] = useState('');
 
   const TOKENDECIMALS = 18;
 
@@ -117,7 +102,6 @@ function App() {
     const load = async() => { 
       await getUserDetails();
       await getTokensBalance();
-      console.log(campaigns);
     }
 
     if (typeof web3 !== 'undefined'
@@ -158,34 +142,6 @@ function App() {
     //console.log(accountBalances);
   }
 
-  async function  changeBuyTokensAmount(_cId,event) {
-    buyTokensInput[_cId] = event.target.value;
-    setBuyTokensInput(buyTokensInput);
-  }
-  async function deposit() {
-    let amount = web3.utils.toWei(inputStake.toString());
-    console.log(amount);
-    const txResult = await depositTokenContract.methods.approve(stakerContract.options.address, amount.toString()).send({ from: accounts[0] });
-    const t = await stakerContract.methods.deposit(amount).send({ from: accounts[0] });
-    setInputStake("");
-    await getUserDetails();
-    await getTokensBalance();
-  }
-
-  
-  async function withdraw() {
-    let amount = web3.utils.toWei(inputUnstake.toString());
-    const t = await stakerContract.methods.withdraw(amount).send({ from: accounts[0] });
-    setInputUnstake("");
-    await getUserDetails();
-    await getTokensBalance();
-  }
-
-  async function claim() {
-    const t = await stakerContract.methods.claim().send({ from: accounts[0] });
-    await getUserDetails();
-    await getTokensBalance();
-  }
 
   async function getTimes(_amount) {
     let t = await stakerContract.methods.getTime().call({ from: accounts[0] });
@@ -198,8 +154,6 @@ function App() {
     //await advanceTimeAndBlock(60*60*24*15);
     t = await stakerContract.methods.getTime().call({ from: accounts[0] });
     console.log(t);
-    console.log(inputStake);
-    console.log(inputUnstake);
     console.log("new");
     console.log(accounts[0].toLowerCase() === owner.toLowerCase());
     console.log(accounts[0]);
@@ -215,7 +169,7 @@ function App() {
     let rewardBalance = await rewardTokenContract.methods.balanceOf(accounts[0]).call({ from: accounts[0] });
     let depSymbol = await depositTokenContract.methods.symbol().call({ from: accounts[0] });
     let rewSymbol = await rewardTokenContract.methods.symbol().call({ from: accounts[0] });
-    //uint256 _rewardPerSecond, uint256 _secondsLeft, uint256 _deposited, uint256 _pending) {
+
     let parsed = {
       rewardPerSecond: (res["_rewardPerSecond"]*24*60*60/(10**18))
       , daysLeft: (res["_secondsLeft"]/60/60/24)
@@ -244,35 +198,7 @@ function App() {
     return n.toLocaleString('fullwide',{useGrouping:false,maximumFractionDigits:20})
   }
 
-  function numberToFixed(n) {
-    if (n === undefined)
-      return n;
-    return n.toFixed(6);
-  }
-
-  function extractTime(part) {
-    let daysLeft = userDetails["daysLeft"];
-    if (part === "d")
-      return Math.floor(daysLeft);
-    if (part === "h")
-      return Math.floor((daysLeft - Math.floor(daysLeft)) * 24);
-    if (part === "m")
-      return Math.floor((daysLeft - Math.floor(daysLeft) - Math.floor(daysLeft - Math.floor(daysLeft))) * 60);
-    return undefined;
-  }
-
-  const CardKeyValue = (props) => (
-    <>
-      <div style={{ display: 'flex' , width: '90%' , margin: 'auto' }}>
-        <div>
-          {props.label}
-        </div>
-        <div style={{ marginLeft: 'auto' }}>
-          {props.value}
-        </div>
-      </div><hr/>
-    </>
-  );
+ 
 
 
 
@@ -322,98 +248,21 @@ function App() {
     </>
   );
 
-  const TimeLeftField = () => (
-    <>
-      <div className="time-left-label">
-        <div>
-          Time Left
-        </div>
-        <div className="time">
-          <div>
-            <div>
-              {extractTime("d")}
-            </div>
-            <div>
-              days
-            </div>
-          </div>
-          <div>
-            <div>
-            {extractTime("h")}
-            </div>
-            <div>
-              hours
-            </div>
-          </div>
-          <div>
-            <div>
-            {extractTime("m")}
-            </div>
-            <div>
-              mins
-            </div>
-          </div>
-        </div>
-      </div>
-      <hr/>
-    </>
-  )
-
 
   if (typeof web3 === 'undefined') {
     return <div>Loading Web3, accounts, and contract...</div>;
   }
+
   return (
     <div className="outerApp">
       <Nav2 />
       <div className="App">
-        <BlockchainContext.Provider value={{web3, accounts, stakerContract, rewardTokenContract}}>
+        <BlockchainContext.Provider value={{web3, accounts, stakerContract, rewardTokenContract, depositTokenContract}}>
         <DisplayContext.Provider value={{userDetails, getUserDetails, numberToFullDisplay, onInputNumberChange}}>
           
           <br/>
           <div style={{display: 'flex'}}>
-            <Container className="square inner-container">
-              
-              <br/>
-              {userDetails["daysLeft"] !== undefined? <TimeLeftField /> : undefined}
-
-              <CardKeyValue label="Global rewards per day" value={numberToFixed(userDetails["rewardPerSecond"])} />
-              
-              <CardKeyValue label="Your staked" value={numberToFixed(userDetails["deposited"])} />
-              <CardKeyValue label="Your pending rewards" value={numberToFixed(userDetails["pending"])} />
-              
-
-              <br/><br/>
-              <div className="label-above-button">
-                Available {userDetails["depSymbol"]} balance to stake: {numberToFullDisplay(userDetails["depositTokenBalance"])}
-              </div>
-              <div className="input-button-container">
-                <div>
-                  <Form.Control placeholder="Amount" value={inputStake} onChange={(e) => {onInputNumberChange(e, setInputStake)}}/>
-                </div>
-                <div>
-                  <Button onClick={deposit} variant="secondary">Stake</Button>
-                </div>
-              </div><br/>
-              <div className="label-above-button">
-                {userDetails["depSymbol"]} staked: {numberToFullDisplay(userDetails["deposited"])}
-              </div>
-              <div className="input-button-container">
-                <div>
-                  <Form.Control placeholder="Amount" value={inputUnstake} onChange={(e) => {onInputNumberChange(e, setInputUnstake)}}/>
-                </div>
-                <div>
-                  <Button onClick={withdraw} variant="secondary">Unstake</Button>
-                </div>
-              </div><br/>
-              <div className="label-above-button">
-                Pending {userDetails["rewSymbol"]} rewards: {numberToFullDisplay(userDetails["pending"])}
-              </div>
-              <div className="button-stretch">
-                <Button onClick={claim} variant="secondary">Claim rewards</Button>
-              </div>
-              <br/>
-            </Container>
+            <UserPanel />
             {(accounts && accounts[0].toLowerCase() == owner.toLowerCase())? <AdminPanel /> : undefined}
           </div>
           <div>
@@ -425,8 +274,6 @@ function App() {
 
             <b>Dev dashboard</b><br/><br/>
             <Button onClick={getTokensBalance} variant="secondary">Get Tokens Balance</Button>{' '}
-            <Button onClick={deposit} variant="secondary">Deposit</Button>{' '}
-            <Button onClick={withdraw} variant="secondary">Withdraw</Button>{' '}
             <Button onClick={getTimes} variant="secondary">Deets</Button>{' '}
             <br /><br />
             {(tokenBalances && tokenBalances.length>0)?<BalancesTable /> : undefined}

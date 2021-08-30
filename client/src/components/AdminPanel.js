@@ -1,6 +1,6 @@
 import React, {useContext, useState} from "react";
-import BlockchainContext from "./BlockchainContext";
-import DisplayContext from "./DisplayContext";
+import BlockchainContext from "../context/BlockchainContext";
+import DisplayContext from "../context/DisplayContext";
 import Button from 'react-bootstrap/Button';
 import FormControl from 'react-bootstrap/FormControl';
 import Form from 'react-bootstrap/Form';
