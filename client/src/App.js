@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import getWeb3 from "./getWeb3";
+//import getWeb3 from "./getWeb3";
+import Web3 from "web3";
 
 import StakerContract from "./contracts/Staker.json";
 import ERC20FactoryContract from "./contracts/ERC20Factory.json";
@@ -34,69 +35,126 @@ function App() {
 
   useEffect(() => {
     (async () => {
-      try {
-        // Get network provider and web3 instance.
-        const web3 = await getWeb3();
-  
-        // Use web3 to get the user's accounts.
-        //const accounts = await web3.eth.getAccounts();
-        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+      // SET TO LOADING
+      window.addEventListener("load", async () => {
+        try {
+          await window.ethereum.request({ method: 'eth_requestAccounts' });
+          initConnection();
+        }
+        catch(e) {
 
-  
-        // Get the contract instance.
-        //const networkId = await web3.eth.net.getId();
-        const networkId = await window.ethereum.request({ method: 'net_version' });
-        const deployedNetwork = StakerContract.networks[networkId];
-        const instance = new web3.eth.Contract(
-          StakerContract.abi,
-          deployedNetwork && deployedNetwork.address,
-        );
-
-        const erc20FactoryDeployedNetwork = ERC20FactoryContract.networks[networkId];
-        const erc20Factoryinstance = new web3.eth.Contract(
-          ERC20FactoryContract.abi,
-          erc20FactoryDeployedNetwork && erc20FactoryDeployedNetwork.address,
-        );
-
-        const depositTokenAddr = await instance.methods.depositToken().call({ from: accounts[0] });
-        const depositContract = new web3.eth.Contract(MockERC20Contract.abi, depositTokenAddr);
-        console.log("debug");
-        console.log(depositContract);
-
-        const rewardTokenAddr = await instance.methods.rewardToken().call({ from: accounts[0] });
-        const rewardContract = new web3.eth.Contract(MockERC20Contract.abi, rewardTokenAddr);
-
-        console.log(instance);
-        console.log(erc20Factoryinstance);
-
-        //console.log("FACTORY " + erc20Factoryinstance.methods);
-        //console.log(erc20FactoryDeployedNetwork.address);
-  
-        // Set web3, accounts, and contract to the state, and then proceed with an
-        // example of interacting with the contract's methods.
-        setWeb3(web3);
-        setOwner(await instance.methods.owner().call({ from: accounts[0] }));
-        setAccounts(accounts);
-        setStakerContract(instance);
-        setErc20Factory(erc20Factoryinstance);
-        setDepositTokenContract(depositContract);
-        setRewardTokenContract(rewardContract);
-
-        window.ethereum.on('accountsChanged', function (_accounts) {
-          setAccounts(_accounts);
-        });
-          
-      } catch (error) {
-        // Catch any errors for any of the above operations.
-        // TODO switch network is here i think
-        alert(
-          `Failed to load web3, accounts, or contract. Check console for details.`,
-        );
-        console.error(error);
-      }
+        }
+      });
     })();
 
   },[]);
+
+
+  async function connectToWallet() {
+    if (window.ethereum) {
+      //const web3 = new Web3(window.ethereum);
+      const web3 = new Web3(window.ethereum);
+      try {
+        // Request account access if needed
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        // Accounts now exposed
+        return(web3);
+      } catch (error) {
+        if (error.code === 4001) {
+          alert("Please approve wallet connection if you wish to use the application.");
+        }
+        throw(error);
+      }
+    }
+    // Legacy dapp browsers...
+    else if (window.web3) {
+      // Use Mist/MetaMask's provider.
+      const web3 = window.web3;
+      console.log("Injected web3 detected.");
+      return(web3);
+    }
+    // Fallback to localhost; use dev console port by default...
+    else {
+      const provider = new Web3.providers.HttpProvider(
+        "http://127.0.0.1:8545"
+      );
+      const web3 = new Web3(provider);
+      console.log("No web3 instance injected, using Local web3.");
+      return(web3);
+    }
+  }
+
+  async function initConnection() {
+    try {
+      // Get network provider and web3 instance.
+      const web3 = await connectToWallet();
+
+      // Use web3 to get the user's accounts.
+      //const accounts = await web3.eth.getAccounts();
+      const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+
+
+      // Get the contract instance.
+      //const networkId = await web3.eth.net.getId();
+      const networkId = await window.ethereum.request({ method: 'net_version' });
+      const deployedNetwork = StakerContract.networks[networkId];
+      const instance = new web3.eth.Contract(
+        StakerContract.abi,
+        deployedNetwork && deployedNetwork.address,
+      );
+
+      const erc20FactoryDeployedNetwork = ERC20FactoryContract.networks[networkId];
+      const erc20Factoryinstance = new web3.eth.Contract(
+        ERC20FactoryContract.abi,
+        erc20FactoryDeployedNetwork && erc20FactoryDeployedNetwork.address,
+      );
+
+      const depositTokenAddr = await instance.methods.depositToken().call({ from: accounts[0] });
+      const depositContract = new web3.eth.Contract(MockERC20Contract.abi, depositTokenAddr);
+      console.log("debug");
+      console.log(depositContract);
+
+      const rewardTokenAddr = await instance.methods.rewardToken().call({ from: accounts[0] });
+      const rewardContract = new web3.eth.Contract(MockERC20Contract.abi, rewardTokenAddr);
+
+      console.log(instance);
+      console.log(erc20Factoryinstance);
+
+      //console.log("FACTORY " + erc20Factoryinstance.methods);
+      //console.log(erc20FactoryDeployedNetwork.address);
+
+      // Set web3, accounts, and contract to the state, and then proceed with an
+      // example of interacting with the contract's methods.
+      setWeb3(web3);
+      setOwner(await instance.methods.owner().call({ from: accounts[0] }));
+      setAccounts(accounts);
+      setStakerContract(instance);
+      setErc20Factory(erc20Factoryinstance);
+      setDepositTokenContract(depositContract);
+      setRewardTokenContract(rewardContract);
+
+      window.ethereum.on('accountsChanged', function (_accounts) {
+        if (_accounts.length === 0) {
+          setAccounts(undefined);
+          setWeb3(undefined);
+        }
+        else {
+          setAccounts(_accounts);
+        }
+      });
+        
+    } catch (error) {
+      // Catch any errors for any of the above operations.
+      // TODO switch network is here i think
+      if (error.code === 4001)
+        return;
+      alert(
+        `Failed to load web3, accounts, or contract. Check console for details.`,
+      );
+      console.error(error);
+    }
+  }
+  
 
   useEffect(() => {
     const load = async() => { 
@@ -215,7 +273,7 @@ function App() {
           STAKE
         </div>
         <div>
-          Connected: <a href="#login">0x..3fa2 </a>
+          Connected: {accounts? accounts[0].substring(0,6) : undefined}...{accounts? accounts[0].substring(accounts[0].length-4,accounts[0].length) : undefined}
         </div>
       </div>
     </>
@@ -247,7 +305,13 @@ function App() {
 
 
   if (typeof web3 === 'undefined') {
-    return <div>Loading Web3, accounts, and contract...</div>;
+    return (
+    <>
+      <div>
+        <Button onClick={initConnection}>Connect</Button>
+      </div>
+    </>
+    )
   }
 
   return (
