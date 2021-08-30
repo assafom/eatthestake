@@ -199,6 +199,7 @@ function App() {
     console.log(accounts[0].toLowerCase() === owner.toLowerCase());
     console.log(accounts[0]);
     console.log(owner);
+    console.log(userDetails["secondsLeft"]);
     await getTokensBalance();
   }
 
@@ -252,6 +253,17 @@ function App() {
     if (n === undefined)
       return n;
     return n.toFixed(6);
+  }
+
+  function extractTime(part) {
+    let daysLeft = userDetails["daysLeft"];
+    if (part === "d")
+      return Math.floor(daysLeft);
+    if (part === "h")
+      return Math.floor((daysLeft - Math.floor(daysLeft)) * 24);
+    if (part === "m")
+      return Math.floor((daysLeft - Math.floor(daysLeft) - Math.floor(daysLeft - Math.floor(daysLeft))) * 60);
+    return undefined;
   }
 
   const CardKeyValue = (props) => (
@@ -326,6 +338,43 @@ function App() {
     </>
   );
 
+  const TimeLeftField = () => (
+    <>
+      <div className="time-left-label">
+        <div>
+          Time Left
+        </div>
+        <div className="time">
+          <div>
+            <div>
+              {extractTime("d")}
+            </div>
+            <div>
+              days
+            </div>
+          </div>
+          <div>
+            <div>
+            {extractTime("h")}
+            </div>
+            <div>
+              hours
+            </div>
+          </div>
+          <div>
+            <div>
+            {extractTime("m")}
+            </div>
+            <div>
+              mins
+            </div>
+          </div>
+        </div>
+      </div>
+      <hr/>
+    </>
+  )
+
 
   if (typeof web3 === 'undefined') {
     return <div>Loading Web3, accounts, and contract...</div>;
@@ -339,39 +388,9 @@ function App() {
           <br/>
           <div style={{display: 'flex'}}>
             <Container className="square inner-container">
+              
               <br/>
-              <div className="time-left-label">
-                <div>
-                  Time Left
-                </div>
-                <div className="time">
-                  <div>
-                    <div>
-                      14
-                    </div>
-                    <div>
-                      days
-                    </div>
-                  </div>
-                  <div>
-                    <div>
-                      23
-                    </div>
-                    <div>
-                      hours
-                    </div>
-                  </div>
-                  <div>
-                    <div>
-                      58
-                    </div>
-                    <div>
-                      mins
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <hr/>
+              {userDetails["daysLeft"] !== undefined? <TimeLeftField /> : undefined}
 
               <CardKeyValue label="Global rewards per day" value={numberToFixed(userDetails["rewardPerSecond"])} />
               
