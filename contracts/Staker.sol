@@ -149,17 +149,11 @@ contract Staker is Ownable {
 
     function getFrontendView()
     external view returns (uint256 _rewardPerSecond, uint256 _secondsLeft, uint256 _deposited, uint256 _pending) {
-        if (block.timestamp <= rewardPeriodEndTimestamp) { // else, defaults to 0
+        if (block.timestamp <= rewardPeriodEndTimestamp) { // else, anyway defaults to 0
             _secondsLeft = rewardPeriodEndTimestamp.sub(block.timestamp); 
             _rewardPerSecond = rewardPerSecond.div(1e7);
         }
         _deposited = users[msg.sender].deposited;
         _pending = pendingRewards(msg.sender);
-    }
-    
-    // For testing
-    function getTime()
-    public view returns (uint256) {
-        return block.timestamp;
     }
 }
