@@ -24,6 +24,27 @@ contract("Staker", async accounts => {
     let secondsInDayBN = new BN(24).mul(new BN(60)).mul(new BN(60));
     let rpsMultiplierBN = new BN(10**7);
 
+    function assertEqualWithDelta(_num1, _num2, _delta, _message) {
+        if (_num1.toString() !== _num2.toString()
+        && _num1.add(_delta).toString() !== _num2.toString()
+        && _num1.sub(_delta).toString() !== _num2.toString()) {
+            assert.equal(_num1.toString(), _num2.toString() , _message);
+        }
+    }
+
+    // At the moment only allows 1 second error. Should allow up to 3 second error because of ganache things.
+    function assertEqualWith2Delta(_num1, _num2, _delta1, _delta2, _message) {
+        if (_num1.toString() !== _num2.toString()
+        && _num1.add(_delta1).toString() !== _num2.toString()
+        && _num1.sub(_delta1).toString() !== _num2.toString()
+        && _num1.add(_delta2).toString() !== _num2.toString()
+        && _num1.sub(_delta2).toString() !== _num2.toString()
+        && _num1.add(_delta1).add(_delta2).toString() !== _num2.toString()
+        && _num1.sub(_delta1).sub(_delta2).toString() !== _num2.toString()) {
+            assert.equal(_num1.toString(), _num2.toString() , _message);
+        }
+    }
+
 
     it("should calculate the parameters correctly", async () => {
         const staker = await Staker.deployed();
@@ -99,7 +120,8 @@ contract("Staker", async accounts => {
         // Check user rewards balance
         let userNewRewardBalance = await rewardToken.balanceOf(accounts[1], { from: accounts[1] });
         let delta = userNewRewardBalance.sub(prevUserRewardTokenBalance);
-        assert.equal(delta.toString(), expectedPendingReward.toString(), "Wrong amount of rewards sent to user after claim()");
+        assertEqualWithDelta(delta, expectedPendingReward, contractRps.div(rpsMultiplierBN, "Wrong amount of rewards sent to user after claim()"));
+        //assert.equal(delta.toString(), expectedPendingReward.toString(), "Wrong amount of rewards sent to user after claim()");
         prevUserRewardTokenBalance = userNewRewardBalance;
         // Check contract rewards balance 
         let contractNewRewardBalance = await rewardToken.balanceOf(staker.address, { from: accounts[1] });
@@ -132,17 +154,20 @@ contract("Staker", async accounts => {
         await staker.deposit(depositAmount, { from: accounts[1] });
         secsToAdvance = 60*60*24*7;
         await timeMachine.advanceTimeAndBlock(secsToAdvance);
-        let newRewardAmount = web3.utils.toWei("1");
+        let newRewardAmount = web3.utils.toWei("10");
         let newDays = 6;
         await rewardToken.approve(staker.address, newRewardAmount, defaultOptions);
         await staker.addRewards(newRewardAmount, newDays, defaultOptions);
         let newSecsToAdvance = 60*60*24*3;
         await timeMachine.advanceTimeAndBlock(newSecsToAdvance);
         let newContractRps = await staker.rewardPerSecond.call(defaultOptions);
+        console.log(newContractRps.div(rpsMultiplierBN).toString());
         // Test pendingRewards()
         let expectedTotalReward = contractRps.mul(new BN(60*60*24*5)).div(rpsMultiplierBN).add(newContractRps.mul(new BN(newSecsToAdvance)).div(rpsMultiplierBN));
         contractPendingReward = await staker.pendingRewards.call(accounts[1], { from: accounts[1] });
-        assert.equal(contractPendingReward.toString(), expectedTotalReward.toString() , "Wrong pending rewards (view) calculation after adding new campaign");
+        //assertEqualWithDelta(contractPendingReward,expectedTotalReward, contractRps.div(rpsMultiplierBN), "Wrong pending rewards (view) calculation after adding new campaign" );
+        assertEqualWith2Delta(contractPendingReward,expectedTotalReward, contractRps.div(rpsMultiplierBN), newContractRps.div(rpsMultiplierBN), "Wrong pending rewards (view) calculation after adding new campaign" );
+        //assert.equal(contractPendingReward.toString(), expectedTotalReward.toString() , "Wrong pending rewards (view) calculation after adding new campaign");
         // Test withdraw() [both stake + rewards]
 
 
