@@ -79,6 +79,27 @@ hr {
   padding-left: 10px;
 }
 
+.btn:active {
+  background-color: #0D4747 !important;
+  border-color: #0D4747 !important;
+}
+
+.btn:hover, .btn:focus {
+  background-color: #115151;
+  border-color: #115151;
+}
+
+.btn:disabled {
+  background-color: #156667 ;
+  border-color: #156667 ;
+}
+
+.btn {
+  background-color: #156667 ;
+  border-color: #156667 ;
+}
+
+
 .main-buttons-div {
   display: flex;
   margin-left: 25px;

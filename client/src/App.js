@@ -167,7 +167,7 @@ function App() {
 
   const MainViewOrConnectView = () => (
     <>
-      {web3? <MainView /> : <div><br/><Button onClick={initConnection} disabled={isConnectingToWallet}>Connect</Button></div> }
+      {web3? <MainView /> : <div><br/><Button onClick={initConnection} disabled={isConnectingToWallet} >Connect</Button></div> }
     </>
   )
 

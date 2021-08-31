@@ -81,7 +81,7 @@ export default function UserPanel() {
                         <Form.Control placeholder="Amount" value={inputStake} onChange={(e) => {onInputNumberChange(e, setInputStake)}}/>
                     </div>
                     <div>
-                        <Button onClick={deposit} variant="secondary">Stake</Button>
+                        <Button onClick={deposit} >Stake</Button>
                     </div>
                 </div><br/>
 
@@ -93,7 +93,7 @@ export default function UserPanel() {
                         <Form.Control placeholder="Amount" value={inputUnstake} onChange={(e) => {onInputNumberChange(e, setInputUnstake)}}/>
                     </div>
                     <div>
-                        <Button onClick={withdraw} variant="secondary">Unstake</Button>
+                        <Button onClick={withdraw} >Unstake</Button>
                     </div>
                 </div><br/>
 
@@ -101,7 +101,7 @@ export default function UserPanel() {
                     Pending {userDetails["rewSymbol"]} rewards: {numberToFullDisplay(userDetails["pending"])}
                 </div>
                 <div className="button-stretch">
-                    <Button onClick={claim} variant="secondary">Claim rewards</Button>
+                    <Button onClick={claim} >Claim rewards</Button>
                 </div>
                 <br/>
                 </Container>
