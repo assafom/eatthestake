@@ -73,7 +73,7 @@ contract("Staker", async accounts => {
     });
 
 
-    it("should calculate and distribute rewards correctly to one person across multiple campaigns", async () => {
+    it("should calculate and distribute rewards correctly to one person across multiple campaigns and multiple actions", async () => {
         const staker = await Staker.deployed();
         const depositTokenAddr = await staker.depositToken.call();
         const rewardTokenAddr = await staker.rewardToken.call();
@@ -95,7 +95,6 @@ contract("Staker", async accounts => {
         let startingTime = await getTime();
 
         let contractRps = await staker.rewardPerSecond.call(defaultOptions);
-        console.log(contractRps.toString());
         let contractEndTime = await staker.rewardPeriodEndTimestamp.call(defaultOptions);
 
         
@@ -161,14 +160,23 @@ contract("Staker", async accounts => {
         let newSecsToAdvance = 60*60*24*3;
         await timeMachine.advanceTimeAndBlock(newSecsToAdvance);
         let newContractRps = await staker.rewardPerSecond.call(defaultOptions);
-        console.log(newContractRps.div(rpsMultiplierBN).toString());
         // Test pendingRewards()
         let expectedTotalReward = contractRps.mul(new BN(60*60*24*5)).div(rpsMultiplierBN).add(newContractRps.mul(new BN(newSecsToAdvance)).div(rpsMultiplierBN));
         contractPendingReward = await staker.pendingRewards.call(accounts[1], { from: accounts[1] });
         //assertEqualWithDelta(contractPendingReward,expectedTotalReward, contractRps.div(rpsMultiplierBN), "Wrong pending rewards (view) calculation after adding new campaign" );
         assertEqualWith2Delta(contractPendingReward,expectedTotalReward, contractRps.div(rpsMultiplierBN), newContractRps.div(rpsMultiplierBN), "Wrong pending rewards (view) calculation after adding new campaign" );
         //assert.equal(contractPendingReward.toString(), expectedTotalReward.toString() , "Wrong pending rewards (view) calculation after adding new campaign");
+        
         // Test withdraw() [both stake + rewards]
+        prevUserRewardTokenBalance = await rewardToken.balanceOf(accounts[1], { from: accounts[1] });
+        prevUserDepositTokenBalance = await depositToken.balanceOf(accounts[1], { from: accounts[1] });
+        let withdrawAmount = new BN(depositAmount).div(new BN(2));
+        await staker.withdraw(withdrawAmount.toString(), { from: accounts[1] });
+        let newUserRewardTokenBalance = await rewardToken.balanceOf(accounts[1], { from: accounts[1] });
+        let newUserDepositTokenBalance = await depositToken.balanceOf(accounts[1], { from: accounts[1] });
+        
+        assertEqualWith2Delta(newUserDepositTokenBalance, prevUserDepositTokenBalance.add(withdrawAmount), contractRps.div(rpsMultiplierBN), newContractRps.div(rpsMultiplierBN), "After withdraw(), wrong deposit token balance");
+        assertEqualWith2Delta(newUserRewardTokenBalance, prevUserRewardTokenBalance.add(expectedTotalReward), contractRps.div(rpsMultiplierBN), newContractRps.div(rpsMultiplierBN), "After withdraw(), wrong reward token balance");
 
 
     });
