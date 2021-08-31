@@ -29,7 +29,7 @@ export default function NavBar() {
                 STAKE
                 </div>
                 <div>
-                {web3? <AddressView />: ' '}
+                {web3? <AddressView />: 'Not connected'}
                 
                 </div>
             </div>

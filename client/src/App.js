@@ -11,7 +11,9 @@ import NavBar from "./components/NavBar";
 import AdminPanel from "./components/AdminPanel";
 import UserPanel from "./components/UserPanel";
 
+
 import Button from 'react-bootstrap/Button';
+import Spinner from 'react-bootstrap/Spinner'
 
 import "./App.css";
 
@@ -27,7 +29,6 @@ function App() {
 
   const [isGlobalLoading, setIsGlobalLoading] = useState(true);
   const [isConnectingToWallet, setIsConnectingToWallet] = useState(false);
-  const [connectButtonMessage, setConnectButtonMessage] = useState("Connect");
 
   const TOKENDECIMALS = 18;
 
@@ -51,7 +52,6 @@ function App() {
     try {
       // Get network provider and web3 instance.
       setIsConnectingToWallet(true);
-      setConnectButtonMessage("Please approve wallet connection...");
       const web3 = await connectToWallet();
 
       setIsGlobalLoading(true);
@@ -100,7 +100,6 @@ function App() {
     } finally {
       setIsGlobalLoading(false);
       setIsConnectingToWallet(false);
-      setConnectButtonMessage("Connect");
     }
   }
   
@@ -121,6 +120,7 @@ function App() {
 
 
   async function refreshUserDetails() {
+    setIsGlobalLoading(true);
     let res = await stakerContract.methods.getFrontendView().call({ from: accounts[0] });
     let depBalance = await depositTokenContract.methods.balanceOf(accounts[0]).call({ from: accounts[0] });
     let rewardBalance = await rewardTokenContract.methods.balanceOf(accounts[0]).call({ from: accounts[0] });
@@ -138,6 +138,7 @@ function App() {
       , rewSymbol: rewSymbol }
 
     setUserDetails(parsed);
+    setIsGlobalLoading(false);
   }
 
   function onInputNumberChange(e, f) {
@@ -166,7 +167,7 @@ function App() {
 
   const MainViewOrConnectView = () => (
     <>
-      {web3? <MainView /> : <div><br/><Button onClick={initConnection} disabled={isConnectingToWallet}>{connectButtonMessage}</Button></div> }
+      {web3? <MainView /> : <div><br/><Button onClick={initConnection} disabled={isConnectingToWallet}>Connect</Button></div> }
     </>
   )
 
@@ -174,6 +175,9 @@ function App() {
     <>
       <br/>
       Loading...
+      <br/><br/>
+      <Spinner animation="border" variant="light" />
+
     </>
   )
 
