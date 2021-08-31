@@ -26,6 +26,8 @@ contract Staker is Ownable {
 
     mapping (address => UserInfo) users;
 
+    event AddRewards(uint256 amount, uint256 lengthInDays);
+    event ClaimReward(address indexed user, uint256 amount);
     event Deposit(address indexed user, uint256 amount);
     event Withdraw(address indexed user, uint256 amount);
     
@@ -44,6 +46,7 @@ contract Staker is Ownable {
         rewardPerSecond = _rewardsAmount.mul(1e7).div(_lengthInDays).div(24*60*60);
         //lastRewardTimestamp = block.timestamp;
         require(rewardToken.transferFrom(msg.sender, address(this), _rewardsAmount), "Staker: transfer failed");
+        emit AddRewards(_rewardsAmount, _lengthInDays);
     }
 
     function updateRewards()
@@ -81,6 +84,7 @@ contract Staker is Ownable {
         if (user.deposited > 0) {
             uint256 pending = user.deposited.mul(accumulatedRewardPerShare).div(1e12).div(1e7).sub(user.rewardsAlreadyConsidered);
             require(rewardToken.transfer(msg.sender, pending), "Staker: transfer failed");
+            emit ClaimReward(msg.sender, pending);
         }
         require(depositToken.transferFrom(msg.sender, address(this), _amount), "Staker: transferFrom failed");
         user.deposited = user.deposited.add(_amount);
@@ -96,6 +100,7 @@ contract Staker is Ownable {
         updateRewards();
         uint256 pending = user.deposited.mul(accumulatedRewardPerShare).div(1e12).div(1e7).sub(user.rewardsAlreadyConsidered);
         require(rewardToken.transfer(msg.sender, pending), "Staker: reward transfer failed");
+        emit ClaimReward(msg.sender, pending);
         user.deposited = user.deposited.sub(_amount);
         user.rewardsAlreadyConsidered = user.deposited.mul(accumulatedRewardPerShare).div(1e12).div(1e7);
         require(depositToken.transfer(msg.sender, _amount), "Staker: deposit withdrawal failed");
@@ -111,6 +116,7 @@ contract Staker is Ownable {
         updateRewards();
         uint256 pending = user.deposited.mul(accumulatedRewardPerShare).div(1e12).div(1e7).sub(user.rewardsAlreadyConsidered);
         require(rewardToken.transfer(msg.sender, pending), "Staker: transfer failed");
+        emit ClaimReward(msg.sender, pending);
         user.rewardsAlreadyConsidered = user.deposited.mul(accumulatedRewardPerShare).div(1e12).div(1e7);
         
     }
