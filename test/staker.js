@@ -24,25 +24,11 @@ contract("Staker", async accounts => {
     let secondsInDayBN = new BN(24).mul(new BN(60)).mul(new BN(60));
     let rpsMultiplierBN = new BN(10**7);
 
-    function assertEqualWithDelta(_num1, _num2, _delta, _message) {
-        if (_num1.toString() !== _num2.toString()
-        && _num1.add(_delta).toString() !== _num2.toString()
-        && _num1.sub(_delta).toString() !== _num2.toString()) {
-            assert.equal(_num1.toString(), _num2.toString() , _message);
-        }
-    }
+    function assertEqualWithMargin(_num1, _num2, _margin, _message) {
+        if (BN.max(_num1,_num2).sub(BN.min(_num1,_num2)).lte(_margin.mul(new BN(3))))
+            return;
 
-    // At the moment only allows 1 second error. Should allow up to 3 second error because of ganache things.
-    function assertEqualWith2Delta(_num1, _num2, _delta1, _delta2, _message) {
-        if (_num1.toString() !== _num2.toString()
-        && _num1.add(_delta1).toString() !== _num2.toString()
-        && _num1.sub(_delta1).toString() !== _num2.toString()
-        && _num1.add(_delta2).toString() !== _num2.toString()
-        && _num1.sub(_delta2).toString() !== _num2.toString()
-        && _num1.add(_delta1).add(_delta2).toString() !== _num2.toString()
-        && _num1.sub(_delta1).sub(_delta2).toString() !== _num2.toString()) {
-            assert.equal(_num1.toString(), _num2.toString() , _message);
-        }
+        assert.equal(_num1.toString(), _num2.toString() , _message);
     }
 
 
@@ -92,10 +78,7 @@ contract("Staker", async accounts => {
         await staker.addRewards(rewardAmount, days, defaultOptions);
         let prevContractRewardTokenBalance = await rewardToken.balanceOf(staker.address, { from: accounts[1] });
 
-        let startingTime = await getTime();
-
         let contractRps = await staker.rewardPerSecond.call(defaultOptions);
-        let contractEndTime = await staker.rewardPeriodEndTimestamp.call(defaultOptions);
 
         
         // User stakes funds, make sure no pending rewards yet
@@ -119,7 +102,7 @@ contract("Staker", async accounts => {
         // Check user rewards balance
         let userNewRewardBalance = await rewardToken.balanceOf(accounts[1], { from: accounts[1] });
         let delta = userNewRewardBalance.sub(prevUserRewardTokenBalance);
-        assertEqualWithDelta(delta, expectedPendingReward, contractRps.div(rpsMultiplierBN, "Wrong amount of rewards sent to user after claim()"));
+        assertEqualWithMargin(delta, expectedPendingReward, contractRps.div(rpsMultiplierBN), "Wrong amount of rewards sent to user after claim()");
         //assert.equal(delta.toString(), expectedPendingReward.toString(), "Wrong amount of rewards sent to user after claim()");
         prevUserRewardTokenBalance = userNewRewardBalance;
         // Check contract rewards balance 
@@ -163,9 +146,7 @@ contract("Staker", async accounts => {
         // Test pendingRewards()
         let expectedTotalReward = contractRps.mul(new BN(60*60*24*5)).div(rpsMultiplierBN).add(newContractRps.mul(new BN(newSecsToAdvance)).div(rpsMultiplierBN));
         contractPendingReward = await staker.pendingRewards.call(accounts[1], { from: accounts[1] });
-        //assertEqualWithDelta(contractPendingReward,expectedTotalReward, contractRps.div(rpsMultiplierBN), "Wrong pending rewards (view) calculation after adding new campaign" );
-        assertEqualWith2Delta(contractPendingReward,expectedTotalReward, contractRps.div(rpsMultiplierBN), newContractRps.div(rpsMultiplierBN), "Wrong pending rewards (view) calculation after adding new campaign" );
-        //assert.equal(contractPendingReward.toString(), expectedTotalReward.toString() , "Wrong pending rewards (view) calculation after adding new campaign");
+        assertEqualWithMargin(contractPendingReward, expectedTotalReward, contractRps.add(newContractRps).div(rpsMultiplierBN), "Wrong pending rewards (view) calculation after adding new campaign" );
         
         // Test withdraw() [both stake + rewards]
         prevUserRewardTokenBalance = await rewardToken.balanceOf(accounts[1], { from: accounts[1] });
@@ -175,15 +156,98 @@ contract("Staker", async accounts => {
         let newUserRewardTokenBalance = await rewardToken.balanceOf(accounts[1], { from: accounts[1] });
         let newUserDepositTokenBalance = await depositToken.balanceOf(accounts[1], { from: accounts[1] });
         
-        assertEqualWith2Delta(newUserDepositTokenBalance, prevUserDepositTokenBalance.add(withdrawAmount), contractRps.div(rpsMultiplierBN), newContractRps.div(rpsMultiplierBN), "After withdraw(), wrong deposit token balance");
-        assertEqualWith2Delta(newUserRewardTokenBalance, prevUserRewardTokenBalance.add(expectedTotalReward), contractRps.div(rpsMultiplierBN), newContractRps.div(rpsMultiplierBN), "After withdraw(), wrong reward token balance");
+        assertEqualWithMargin(newUserDepositTokenBalance, prevUserDepositTokenBalance.add(withdrawAmount), contractRps.add(newContractRps).div(rpsMultiplierBN), "After withdraw(), wrong deposit token balance");
+        assertEqualWithMargin(newUserRewardTokenBalance, prevUserRewardTokenBalance.add(expectedTotalReward), contractRps.add(newContractRps).div(rpsMultiplierBN), "After withdraw(), wrong reward token balance");
 
 
     });
+    it("should calculate and distribute rewards correctly to multiple stakers", async () => {
+        const staker = await Staker.deployed();
+        const depositTokenAddr = await staker.depositToken.call();
+        const rewardTokenAddr = await staker.rewardToken.call();
 
+        let rewardAmount = web3.utils.toWei("300");
+        let days = 30;
 
-    it("calculate and distribute rewards correctly to multiple stakers", async () => {
+        const rewardToken = await MockERC20.at(rewardTokenAddr);
+        const depositToken = await MockERC20.at(depositTokenAddr);
 
+        let prevUser1RewardTokenBalance = await rewardToken.balanceOf(accounts[1], { from: accounts[1] });
+        let prevUser1DepositTokenBalance = await depositToken.balanceOf.call(accounts[1], { from: accounts[1] });
+        let prevUser2RewardTokenBalance = await rewardToken.balanceOf(accounts[2], { from: accounts[2] });
+        let prevUser2DepositTokenBalance = await depositToken.balanceOf.call(accounts[2], { from: accounts[2] });
+        
+        // Add staking rewards
+        await rewardToken.approve(staker.address, rewardAmount, defaultOptions);
+        await staker.addRewards(rewardAmount, days, defaultOptions);
 
+        let contractRps = await staker.rewardPerSecond.call(defaultOptions);
+
+        // User 1 stakes (from the start)
+        let depositAmount = web3.utils.toWei("10");
+        await depositToken.approve(staker.address, depositAmount, { from: accounts[1] });
+        await staker.deposit(depositAmount, { from: accounts[1] });
+        let user1StartingTime = await getTime();
+
+        // Advance time by 10 days (2/3 of campaign length), user 2 now also stakes but 4 times the amount user1 staked
+        let secsToAdvance = 60*60*24*10;
+        await timeMachine.advanceTimeAndBlock(secsToAdvance);
+        let depositAmount2 = web3.utils.toWei((10*4).toString());
+        await depositToken.approve(staker.address, depositAmount2, { from: accounts[2] });
+        await staker.deposit(depositAmount2, { from: accounts[2] });
+        let user2StartingTime = await getTime();
+
+        // Advance time by 20 days, campaign has finished, users call withdraw, make sure users received correct rewards:
+        // User1 had 100% of pool for 1/3 of the campaign so should receive 1/3 of the pool (100) + 20% of pool for remaining 20 days so should receive 40 for a total of 140
+        // User2 had 80% of pool for 20 days of the campaign so should receive 300*0.8*2/3 = 160
+        secsToAdvance = 60*60*24*20;
+        await timeMachine.advanceTimeAndBlock(secsToAdvance);
+        
+        await staker.withdraw(depositAmount.toString(), { from: accounts[1] });
+        let user1EndingTime = await getTime();
+        await staker.withdraw(depositAmount2.toString(), { from: accounts[2] });
+        let user2EndingTime = await getTime();
+        let newUser1RewardTokenBalance = await rewardToken.balanceOf(accounts[1], { from: accounts[1] });
+        let newUser1DepositTokenBalance = await depositToken.balanceOf.call(accounts[1], { from: accounts[1] });
+        let newUser2RewardTokenBalance = await rewardToken.balanceOf(accounts[2], { from: accounts[2] });
+        let newUser2DepositTokenBalance = await depositToken.balanceOf.call(accounts[2], { from: accounts[2] });
+        assertEqualWithMargin(newUser1DepositTokenBalance, prevUser1DepositTokenBalance, contractRps.div(rpsMultiplierBN), "User1 hasn't received correct amount of deposit back");
+        assertEqualWithMargin(newUser2DepositTokenBalance, prevUser2DepositTokenBalance, contractRps.div(rpsMultiplierBN), "User2 hasn't received correct amount of deposit back");
+        let user1ExpectedReward = contractRps.mul(new BN(user2StartingTime - user1StartingTime)).div(rpsMultiplierBN).add(contractRps.mul(new BN(user1EndingTime - user2StartingTime)).div(new BN(5)).div(rpsMultiplierBN));
+        let user2ExpectedReward = contractRps.mul(new BN(user1EndingTime - user2StartingTime)).mul(new BN(4)).div(new BN(5)).div(rpsMultiplierBN).add(contractRps.mul(new BN(user2EndingTime - user1EndingTime)).div(rpsMultiplierBN));
+        assertEqualWithMargin(newUser1RewardTokenBalance, prevUser1RewardTokenBalance.add(user1ExpectedReward), contractRps.div(rpsMultiplierBN),  "User1 hasn't received correct amount of rewards");
+        assertEqualWithMargin(newUser2RewardTokenBalance, prevUser2RewardTokenBalance.add(user2ExpectedReward), contractRps.div(rpsMultiplierBN),  "User2 hasn't received correct amount of rewards");
+        
+    });
+
+    it("should not let user withdraw more than staked", async () => {
+        const staker = await Staker.deployed();
+        const depositTokenAddr = await staker.depositToken.call();
+        const rewardTokenAddr = await staker.rewardToken.call();
+
+        let rewardAmount = web3.utils.toWei("300");
+        let days = 30;
+
+        const rewardToken = await MockERC20.at(rewardTokenAddr);
+        const depositToken = await MockERC20.at(depositTokenAddr);
+
+        // Add staking rewards
+        await rewardToken.approve(staker.address, rewardAmount, defaultOptions);
+        await staker.addRewards(rewardAmount, days, defaultOptions);
+        // User 1 stakes
+        let depositAmount = web3.utils.toWei("10");
+        await depositToken.approve(staker.address, depositAmount, { from: accounts[1] });
+        await staker.deposit(depositAmount, { from: accounts[1] });
+        
+        // Try to withdraw more than possible
+        let withdrawAmount = web3.utils.toWei("11");
+        try {
+            await staker.withdraw(withdrawAmount, { from: accounts[1] });;
+            throw null;
+        }
+        catch (error) {
+            assert(error, "Expected an error but did not get one");
+            assert(error.message.search("revert") >= 0, "Not reverted on too big withdraw");
+        }
     });
 });
