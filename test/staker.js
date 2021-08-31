@@ -25,7 +25,7 @@ contract("Staker", async accounts => {
     let rpsMultiplierBN = new BN(10**7);
 
 
-    it("should calculate the rewards correctly", async () => {
+    it("should calculate the parameters correctly", async () => {
         const staker = await Staker.deployed();
         const depositTokenAddr = await staker.depositToken.call();
         const rewardTokenAddr = await staker.rewardToken.call();
@@ -74,6 +74,7 @@ contract("Staker", async accounts => {
         let startingTime = await getTime();
 
         let contractRps = await staker.rewardPerSecond.call(defaultOptions);
+        console.log(contractRps.toString());
         let contractEndTime = await staker.rewardPeriodEndTimestamp.call(defaultOptions);
 
         
