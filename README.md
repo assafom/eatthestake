@@ -44,4 +44,4 @@ advancetime = new Promise((resolve,reject) => { web3.currentProvider.send({jsonr
 
 ## Misc
 - The contract is based upon SushiSwap's MasterChefV2.
-- In the development network, the contract deploys 2 mock ERC20 contracts and mints tokens for the first Ganache accounts, for testing.
+- In the development network, the contract deploys 2 mock ERC20 contracts and mints tokens for the first Ganache accounts, for testing. The first account will be the owner who is allowed to add rewards, and the next 2 accounts can be used for staking and testing.
