@@ -11,7 +11,8 @@ import NavBar from "./components/NavBar";
 import AdminPanel from "./components/AdminPanel";
 import UserPanel from "./components/UserPanel";
 
-
+import { ToastContainer, toast, Slide } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Button from 'react-bootstrap/Button';
 import Spinner from 'react-bootstrap/Spinner'
 
@@ -184,13 +185,25 @@ function App() {
   return (
     <div className="outerApp">
       <BlockchainContext.Provider value={{web3, accounts, stakerContract, rewardTokenContract, depositTokenContract}}>
-      <DisplayContext.Provider value={{userDetails, refreshUserDetails, numberToFullDisplay, onInputNumberChange}}>
+      <DisplayContext.Provider value={{userDetails, refreshUserDetails, numberToFullDisplay, onInputNumberChange, toast}}>
         <NavBar />
         <div className="App">
           {isGlobalLoading? <LoadingView/> : <MainViewOrConnectView/> }
         </div>
       </DisplayContext.Provider>
       </BlockchainContext.Provider>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss={false}
+        draggable
+        pauseOnHover
+        transition={Slide}
+      />
     </div>
     
   )

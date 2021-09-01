@@ -15,37 +15,65 @@ export default function UserPanel() {
     const blockchainContext = useContext(BlockchainContext);
     const displayContext = useContext(DisplayContext);
     const { web3, accounts, stakerContract, depositTokenContract } = blockchainContext;
-    const {userDetails, refreshUserDetails, numberToFullDisplay, onInputNumberChange} = displayContext;
+    const {userDetails, refreshUserDetails, numberToFullDisplay, onInputNumberChange, toast} = displayContext;
 
     const [inputStake, setInputStake] = useState('');
     const [inputUnstake, setInputUnstake] = useState('');
 
     async function deposit() {
+        if (inputStake == 0) {
+            toast.info('No amount entered');
+            return;
+        }
+        toast.dismiss();
         let amount = web3.utils.toWei(inputStake.toString());
-        await depositTokenContract.methods.approve(stakerContract.options.address, amount.toString()).send({ from: accounts[0] });
-        await stakerContract.methods.deposit(amount).send({ from: accounts[0] });
+        try {
+            toast.info('Please approve transaction 1/2 (allowance)...', {position: 'top-left', autoClose: false});
+            await depositTokenContract.methods.approve(stakerContract.options.address, amount.toString()).send({ from: accounts[0] });
+            toast.dismiss();
+            toast.info('Please approve transaction 2/2 (staking)...', {position: 'top-left', autoClose: false});
+            await stakerContract.methods.deposit(amount).send({ from: accounts[0] });
+        } finally {
+            toast.dismiss();
+        }
         setInputStake("");
         await refreshUserDetails();
     }
     
       
     async function withdraw() {
+        if (inputUnstake == 0) {
+            toast.info('No amount entered');
+            return;
+        }
+        toast.dismiss();
         let amount = web3.utils.toWei(inputUnstake.toString());
-        await stakerContract.methods.withdraw(amount).send({ from: accounts[0] });
+        toast.info('Please approve transaction...', {position: 'top-left', autoClose: false});
+        try {
+            await stakerContract.methods.withdraw(amount).send({ from: accounts[0] });
+        } finally {
+            toast.dismiss();
+        }
         setInputUnstake("");
         await refreshUserDetails();
     }
     
     async function claim() {
-        await stakerContract.methods.claim().send({ from: accounts[0] });
+        toast.dismiss();
+        toast.info('Please approve transaction...', {position: 'top-left', autoClose: false});
+        try {
+            await stakerContract.methods.claim().send({ from: accounts[0] });
+        } finally {
+            toast.dismiss();
+        }
         await refreshUserDetails();
     }
 
     function numberToFixed(n) {
         if (n === undefined)
-          return n;
+            return n;
         return n.toFixed(6);
-      }
+    }
     
 
     const CardKeyValue = (props) => (
@@ -61,13 +89,28 @@ export default function UserPanel() {
         </>
     );
 
+    const RewardsPhaseFinished = (props) => (
+        <>
+        <div style={{width: '90%' , margin: 'auto' }}>
+            <div>Staking reward period finished</div>
+            <div style={{fontSize:'14px', fontWeight: '400' }}>Please check back later for next phase</div>
+        </div><hr/>
+        </>
+    );
+
+    const RewardsPhaseActive = (props) => (
+        <>
+            <TimeLeftField />
+            <CardKeyValue label="Global rewards per day" value={numberToFixed(userDetails["rewardPerSecond"])} />
+        </>
+    );
+
 
     return (
         <>
             <Container className="square inner-container">
                 <br/>
-                <TimeLeftField />
-                <CardKeyValue label="Global rewards per day" value={numberToFixed(userDetails["rewardPerSecond"])} />
+                {numberToFixed(userDetails["rewardPerSecond"]) != 0? <RewardsPhaseActive /> : <RewardsPhaseFinished/>}
                 <CardKeyValue label="Your staked" value={numberToFixed(userDetails["deposited"])} />
                 <CardKeyValue label="Your pending rewards" value={numberToFixed(userDetails["pending"])} />
                 

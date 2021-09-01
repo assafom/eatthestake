@@ -7,6 +7,7 @@
     "react-bootstrap": "^2.0.0-beta.4",
     "react-dom": "16.14.0",
     "react-scripts": "3.2.0",
+    "react-toastify": "^8.0.2",
     "web3": "1.2.2"
   },
   "scripts": {

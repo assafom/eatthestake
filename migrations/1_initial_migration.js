@@ -7,7 +7,7 @@ module.exports = async function(deployer, network, accounts) {
   let depositToken = '0x1';
   let rewardToken = '0x2';
   
-  if (network == "develop") {
+  if (network == "development") {
     await deployer.deploy(ERC20Factory);
     const erc20factory = await ERC20Factory.deployed();
     await erc20factory.createToken("Eat The Blocks", "ETB");

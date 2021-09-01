@@ -13,16 +13,33 @@ export default function AdminPanel() {
     const blockchainContext = useContext(BlockchainContext);
     const displayContext = useContext(DisplayContext);
     const { accounts, stakerContract, rewardTokenContract } = blockchainContext;
-    const {userDetails, refreshUserDetails, numberToFullDisplay, onInputNumberChange} = displayContext;
+    const {userDetails, refreshUserDetails, numberToFullDisplay, onInputNumberChange, toast} = displayContext;
 
     const [inputAdminRewards, setInputAdminRewards] = useState('');
     const [inputAdminDuration, setInputAdminDuration] = useState('');
 
     async function addRewards() {
+        if (userDetails["rewardPerSecond"] != 0) {
+            toast.info("Can't add rewards in middle of campaign. Please wait for campaign to finish.");
+            return;
+        }
+        if (inputAdminRewards == 0 || inputAdminDuration == 0) {
+            toast.info('Please add missing input');
+            return;
+        }
+        toast.dismiss();
         let amount = inputAdminRewards * 10**18;
         let days = inputAdminDuration;
-        await rewardTokenContract.methods.approve(stakerContract.options.address, amount.toString()).send({ from: accounts[0] });
-        await stakerContract.methods.addRewards(amount.toString(), days).send({ from: accounts[0] });
+        try {
+            toast.info('Please approve transaction 1/2 (allowance)...', {position: 'top-left', autoClose: false});
+            await rewardTokenContract.methods.approve(stakerContract.options.address, amount.toString()).send({ from: accounts[0] });
+            toast.dismiss();
+            toast.info('Please approve transaction 2/2 (add rewards)...', {position: 'top-left', autoClose: false});
+            await stakerContract.methods.addRewards(amount.toString(), days).send({ from: accounts[0] });
+        } finally {
+            toast.dismiss();
+        }
+        
         await refreshUserDetails();
     }
 
