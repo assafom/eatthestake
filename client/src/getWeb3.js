@@ -10,7 +10,7 @@ async function connectToWallet() {
       return(web3);
     } catch (error) {
       if (error.code === 4001) {
-        alert("Please approve wallet connection if you wish to use the application.");
+        //alert("Please approve wallet connection if you wish to use the application.");
       }
       throw(error);
     }
