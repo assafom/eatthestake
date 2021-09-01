@@ -1,29 +1,29 @@
 {
-  "name": "prisale",
-  "version": "1.0.0",
-  "description": "A starter kit for Dapps using Truffle and React Hooks.",
+  "name": "eat-the-stake",
+  "version": "0.1.0",
+  "description": "Staking DApp for Eat The Blocks Project #2.",
   "main": "soljson-v0.7.6+commit.7338295f.js",
   "directories": {
     "test": "test"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^3.4.0",
-    "csvtojson": "^2.0.10",
     "ganache-time-traveler": "^1.0.16"
   },
   "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "truffle test",
+    "deploy": "truffle migrate --reset"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/assafom/prisale.git"
+    "url": "git+https://github.com/assafom/eatthestake.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/assafom/prisale/issues"
+    "url": "https://github.com/assafom/eatthestake/issues"
   },
-  "homepage": "https://github.com/assafom/prisale#readme"
+  "homepage": "https://github.com/assafom/eatthestake#readme"
 }
