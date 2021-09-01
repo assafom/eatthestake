@@ -25,7 +25,8 @@ export default function UserPanel() {
             toast.error('No amount entered.');
             return;
         }
-        if (inputStake > userDetails["depositTokenBalance"]) {
+        if (parseFloat(inputStake) > parseFloat(userDetails["depositTokenBalance"])) {
+            console.log(typeof inputStake);
             toast.error("Not enough balance.");
             return;
         }
@@ -50,7 +51,7 @@ export default function UserPanel() {
             toast.error('No amount entered.');
             return;
         }
-        if (inputUnstake > userDetails["deposited"]) {
+        if (parseFloat(inputUnstake) > parseFloat(userDetails["deposited"])) {
             toast.error("Can't unstake more than staked.");
             return;
         }

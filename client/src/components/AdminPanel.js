@@ -27,7 +27,7 @@ export default function AdminPanel() {
             toast.info('Please add missing input.');
             return;
         }
-        if (inputAdminRewards > userDetails["rewardTokenBalance"]) {
+        if (parseFloat(inputAdminRewards) > parseFloat(userDetails["rewardTokenBalance"])) {
         //if (new BN(inputAdminRewards).gt(new BN(userDetails["rewardTokenBalance"]))) {
             console.log(typeof inputAdminRewards);
             console.log(typeof userDetails["rewardTokenBalance"]);
