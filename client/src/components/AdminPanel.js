@@ -27,6 +27,10 @@ export default function AdminPanel() {
             toast.info('Please add missing input');
             return;
         }
+        if (inputAdminRewards > userDetails["rewardTokenBalance"]) {
+            toast.error("Not enough balance.");
+            return;
+        }
         toast.dismiss();
         let amount = inputAdminRewards * 10**18;
         let days = inputAdminDuration;

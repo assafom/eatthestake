@@ -189,3 +189,28 @@ button:focus , button:active {
   display: flex;
   flex-direction: column;
 }
+
+.card-key-value {
+  display: flex;
+  width: 90%;
+  margin: auto;
+}
+
+.card-key-value >div:nth-of-type(2) {
+  margin-left: auto;
+}
+
+.two-line-label {
+  width: 90%;
+  margin: auto;
+}
+
+
+.two-line-label >div:nth-of-type(2) {
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.input-button-container >.form-control:focus {
+  box-shadow: 0px 0px 10px 0px rgb(0 0 0 / 50%);
+}

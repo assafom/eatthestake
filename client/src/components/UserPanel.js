@@ -22,7 +22,11 @@ export default function UserPanel() {
 
     async function deposit() {
         if (inputStake == 0) {
-            toast.info('No amount entered');
+            toast.error('No amount entered.');
+            return;
+        }
+        if (inputStake > userDetails["depositTokenBalance"]) {
+            toast.error("Not enough balance.");
             return;
         }
         toast.dismiss();
@@ -43,7 +47,11 @@ export default function UserPanel() {
       
     async function withdraw() {
         if (inputUnstake == 0) {
-            toast.info('No amount entered');
+            toast.error('No amount entered.');
+            return;
+        }
+        if (inputUnstake > userDetails["deposited"]) {
+            toast.error("Can't unstake more than staked.");
             return;
         }
         toast.dismiss();
@@ -78,11 +86,11 @@ export default function UserPanel() {
 
     const CardKeyValue = (props) => (
         <>
-        <div style={{ display: 'flex' , width: '90%' , margin: 'auto' }}>
+        <div className="card-key-value">
             <div>
             {props.label}
             </div>
-            <div style={{ marginLeft: 'auto' }}>
+            <div>
             {props.value}
             </div>
         </div><hr/>
@@ -91,9 +99,9 @@ export default function UserPanel() {
 
     const RewardsPhaseFinished = (props) => (
         <>
-        <div style={{width: '90%' , margin: 'auto' }}>
+        <div className="two-line-label">
             <div>Staking reward period finished</div>
-            <div style={{fontSize:'14px', fontWeight: '400' }}>Please check back later for next phase</div>
+            <div>Please check back later for next phase</div>
         </div><hr/>
         </>
     );

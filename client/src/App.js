@@ -93,9 +93,14 @@ function App() {
     } catch (error) {
       // Catch any errors for any of the above operations.
       // TODO might wanna insert check for wrong network?
-      if (error.code === 4001)
+      if (error.code === 4001) {
+        // User denied access to wallet
         return;
-      alert("Failed to load web3, accounts, or contract. Check console for details.");
+      }
+      if (error.toString().includes("This contract object doesn't have address set yet")) {
+        toast.error("Error: can't load contract. Are you on the right network?");
+        return;
+      }
       console.error(error);
 
     } finally {
