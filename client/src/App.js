@@ -31,9 +31,6 @@ function App() {
   const [isGlobalLoading, setIsGlobalLoading] = useState(true);
   const [isConnectingToWallet, setIsConnectingToWallet] = useState(false);
 
-  const TOKENDECIMALS = 18;
-
-
   useEffect(() => {
     (async () => {
       setIsGlobalLoading(false);
@@ -134,12 +131,12 @@ function App() {
     let rewSymbol = await rewardTokenContract.methods.symbol().call({ from: accounts[0] });
 
     let parsed = {
-      rewardPerSecond: (res["_rewardPerSecond"]*24*60*60/(10**18))
+      rewardPerDay: (res["_rewardPerSecond"]*24*60*60/(10**18))
       , daysLeft: (res["_secondsLeft"]/60/60/24)
-      , deposited: (res["_deposited"]/10**18)
-      , pending: (res["_pending"]/10**18)
-      , depositTokenBalance: (depBalance/10**18)
-      , rewardTokenBalance: (rewardBalance/10**18)
+      , deposited: web3.utils.fromWei(res["_deposited"])
+      , pending: web3.utils.fromWei(res["_pending"])
+      , depositTokenBalance: web3.utils.fromWei(depBalance)
+      , rewardTokenBalance: web3.utils.fromWei(rewardBalance)
       , depSymbol: depSymbol
       , rewSymbol: rewSymbol }
 
@@ -153,13 +150,6 @@ function App() {
       f(e.target.value);
     }
   }
-
-  function numberToFullDisplay(n) {
-    if (n === undefined)
-      return n;
-    return n.toLocaleString('fullwide',{useGrouping:false,maximumFractionDigits:20})
-  }
-
 
   const MainView = () => (
     <>
@@ -190,7 +180,7 @@ function App() {
   return (
     <div className="outerApp">
       <BlockchainContext.Provider value={{web3, accounts, stakerContract, rewardTokenContract, depositTokenContract}}>
-      <DisplayContext.Provider value={{userDetails, refreshUserDetails, numberToFullDisplay, onInputNumberChange, toast}}>
+      <DisplayContext.Provider value={{userDetails, refreshUserDetails, onInputNumberChange, toast}}>
         <NavBar />
         <div className="App">
           {isGlobalLoading? <LoadingView/> : <MainViewOrConnectView/> }

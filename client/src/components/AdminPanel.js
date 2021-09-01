@@ -12,33 +12,38 @@ import Container from 'react-bootstrap/Container';
 export default function AdminPanel() {
     const blockchainContext = useContext(BlockchainContext);
     const displayContext = useContext(DisplayContext);
-    const { accounts, stakerContract, rewardTokenContract } = blockchainContext;
-    const {userDetails, refreshUserDetails, numberToFullDisplay, onInputNumberChange, toast} = displayContext;
+    const { web3, accounts, stakerContract, rewardTokenContract } = blockchainContext;
+    const {userDetails, refreshUserDetails, onInputNumberChange, toast} = displayContext;
 
     const [inputAdminRewards, setInputAdminRewards] = useState('');
     const [inputAdminDuration, setInputAdminDuration] = useState('');
 
     async function addRewards() {
-        if (userDetails["rewardPerSecond"] != 0) {
+        if (userDetails["daysLeft"] != 0) {
             toast.info("Can't add rewards in middle of campaign. Please wait for campaign to finish.");
             return;
         }
         if (inputAdminRewards == 0 || inputAdminDuration == 0) {
-            toast.info('Please add missing input');
+            toast.info('Please add missing input.');
             return;
         }
         if (inputAdminRewards > userDetails["rewardTokenBalance"]) {
+        //if (new BN(inputAdminRewards).gt(new BN(userDetails["rewardTokenBalance"]))) {
+            console.log(typeof inputAdminRewards);
+            console.log(typeof userDetails["rewardTokenBalance"]);
+            console.log(inputAdminRewards > userDetails["rewardTokenBalance"]);
             toast.error("Not enough balance.");
             return;
         }
         toast.dismiss();
-        let amount = inputAdminRewards * 10**18;
+        console.log(stakerContract.options.address);
+        let amount = web3.utils.toWei(inputAdminRewards);
         let days = inputAdminDuration;
         try {
-            toast.info('Please approve transaction 1/2 (allowance)...', {position: 'top-left', autoClose: false});
+            toast.info('Please approve transaction 1 of 2 (allowance)...', {position: 'top-left', autoClose: false});
             await rewardTokenContract.methods.approve(stakerContract.options.address, amount.toString()).send({ from: accounts[0] });
             toast.dismiss();
-            toast.info('Please approve transaction 2/2 (add rewards)...', {position: 'top-left', autoClose: false});
+            toast.info('Please approve transaction 2 of 2 (add rewards)...', {position: 'top-left', autoClose: false});
             await stakerContract.methods.addRewards(amount.toString(), days).send({ from: accounts[0] });
         } finally {
             toast.dismiss();
@@ -56,7 +61,7 @@ export default function AdminPanel() {
 
                 <br/>Amount<br/>
                 <div className="label-above-button">
-                    Available {userDetails["rewSymbol"]} balance to transfer: {numberToFullDisplay(userDetails["rewardTokenBalance"])}
+                    Available {userDetails["rewSymbol"]} balance to transfer: {userDetails["rewardTokenBalance"]}
                 </div>
                 <div className="input-button-container">
                     <Form.Control key="a1" placeholder="Amount" value={inputAdminRewards} onChange={(e) => {onInputNumberChange(e, setInputAdminRewards)}}/>

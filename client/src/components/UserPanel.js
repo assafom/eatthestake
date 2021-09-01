@@ -15,7 +15,7 @@ export default function UserPanel() {
     const blockchainContext = useContext(BlockchainContext);
     const displayContext = useContext(DisplayContext);
     const { web3, accounts, stakerContract, depositTokenContract } = blockchainContext;
-    const {userDetails, refreshUserDetails, numberToFullDisplay, onInputNumberChange, toast} = displayContext;
+    const {userDetails, refreshUserDetails, onInputNumberChange, toast} = displayContext;
 
     const [inputStake, setInputStake] = useState('');
     const [inputUnstake, setInputUnstake] = useState('');
@@ -32,10 +32,10 @@ export default function UserPanel() {
         toast.dismiss();
         let amount = web3.utils.toWei(inputStake.toString());
         try {
-            toast.info('Please approve transaction 1/2 (allowance)...', {position: 'top-left', autoClose: false});
+            toast.info('Please approve transaction 1 of 2 (allowance)...', {position: 'top-left', autoClose: false});
             await depositTokenContract.methods.approve(stakerContract.options.address, amount.toString()).send({ from: accounts[0] });
             toast.dismiss();
-            toast.info('Please approve transaction 2/2 (staking)...', {position: 'top-left', autoClose: false});
+            toast.info('Please approve transaction 2 of 2 (staking)...', {position: 'top-left', autoClose: false});
             await stakerContract.methods.deposit(amount).send({ from: accounts[0] });
         } finally {
             toast.dismiss();
@@ -80,7 +80,7 @@ export default function UserPanel() {
     function numberToFixed(n) {
         if (n === undefined)
             return n;
-        return n.toFixed(6);
+        return parseFloat(n).toFixed(6);
     }
     
 
@@ -109,7 +109,7 @@ export default function UserPanel() {
     const RewardsPhaseActive = (props) => (
         <>
             <TimeLeftField />
-            <CardKeyValue label="Global rewards per day" value={numberToFixed(userDetails["rewardPerSecond"])} />
+            <CardKeyValue label="Global rewards per day" value={numberToFixed(userDetails["rewardPerDay"])} />
         </>
     );
 
@@ -118,14 +118,14 @@ export default function UserPanel() {
         <>
             <Container className="square inner-container">
                 <br/>
-                {numberToFixed(userDetails["rewardPerSecond"]) != 0? <RewardsPhaseActive /> : <RewardsPhaseFinished/>}
+                {numberToFixed(userDetails["rewardPerDay"]) != 0? <RewardsPhaseActive /> : <RewardsPhaseFinished/>}
                 <CardKeyValue label="Your staked" value={numberToFixed(userDetails["deposited"])} />
                 <CardKeyValue label="Your pending rewards" value={numberToFixed(userDetails["pending"])} />
                 
 
                 <br/><br/>
                 <div className="label-above-button">
-                    Available {userDetails["depSymbol"]} balance to stake: {numberToFullDisplay(userDetails["depositTokenBalance"])}
+                    Available {userDetails["depSymbol"]} balance to stake: {userDetails["depositTokenBalance"]}
                 </div>
                 <div className="input-button-container">
                     <div>
@@ -137,7 +137,7 @@ export default function UserPanel() {
                 </div><br/>
 
                 <div className="label-above-button">
-                    {userDetails["depSymbol"]} staked: {numberToFullDisplay(userDetails["deposited"])}
+                    {userDetails["depSymbol"]} staked: {userDetails["deposited"]}
                 </div>
                 <div className="input-button-container">
                     <div>
@@ -149,7 +149,7 @@ export default function UserPanel() {
                 </div><br/>
 
                 <div className="label-above-button">
-                    Pending {userDetails["rewSymbol"]} rewards: {numberToFullDisplay(userDetails["pending"])}
+                    Pending {userDetails["rewSymbol"]} rewards: {userDetails["pending"]}
                 </div>
                 <div className="button-stretch">
                     <Button onClick={claim} >Claim rewards</Button>
