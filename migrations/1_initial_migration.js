@@ -4,9 +4,11 @@ var MockERC20 = artifacts.require("./MockERC20.sol");
 var Web3=require('Web3');
 
 module.exports = async function(deployer, network, accounts) {
-  let depositToken = '0x1';
-  let rewardToken = '0x2';
+  // BSC addresses
+  let depositToken = '0xdb44c35cd6c378eb9e593d4c7243118064172fb2'; // PancakeSwap V2: ETB
+  let rewardToken = '0x7ac64008fa000bfdc4494e0bfcc9f4eff3d51d2a'; // ETB
   
+  // If deploying to dev network, create mock tokens and use them for staking contract.
   if (network == "development") {
     await deployer.deploy(ERC20Factory);
     const erc20factory = await ERC20Factory.deployed();

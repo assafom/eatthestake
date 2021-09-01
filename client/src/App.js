@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import connectToWallet from "./getWeb3";
 
 import StakerContract from "./contracts/Staker.json";
-import MockERC20Contract from "./contracts/MockERC20.json";
-
+import ERC20ABI from "./ERC20ABI.json";
 import BlockchainContext from "./context/BlockchainContext.js";
 import DisplayContext from "./context/DisplayContext.js";
 
@@ -13,6 +12,7 @@ import UserPanel from "./components/UserPanel";
 
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
 import Button from 'react-bootstrap/Button';
 import Spinner from 'react-bootstrap/Spinner'
 
@@ -68,10 +68,10 @@ function App() {
       );
 
       const depositTokenAddr = await instance.methods.depositToken().call({ from: accounts[0] });
-      const depositContract = new web3.eth.Contract(MockERC20Contract.abi, depositTokenAddr);
+      const depositContract = new web3.eth.Contract(ERC20ABI, depositTokenAddr);
 
       const rewardTokenAddr = await instance.methods.rewardToken().call({ from: accounts[0] });
-      const rewardContract = new web3.eth.Contract(MockERC20Contract.abi, rewardTokenAddr);
+      const rewardContract = new web3.eth.Contract(ERC20ABI, rewardTokenAddr);
 
       setWeb3(web3);
       setOwner(await instance.methods.owner().call({ from: accounts[0] }));
