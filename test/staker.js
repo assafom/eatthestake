@@ -94,7 +94,7 @@ contract("Staker", async accounts => {
         await timeMachine.advanceTimeAndBlock(secsToAdvance);
         let contractPendingReward = await staker.pendingRewards.call(accounts[1], { from: accounts[1] });
         let expectedPendingReward = contractRps.mul(new BN(secsToAdvance)).div(rpsMultiplierBN);
-        assert.equal(contractPendingReward.toString(), expectedPendingReward.toString() , "Wrong pending rewards (view) calculation");
+        assertEqualWithMargin(contractPendingReward, expectedPendingReward, contractRps.div(rpsMultiplierBN) , "Wrong pending rewards (view) calculation");
 
 
         // Claim rewards using claim(), make sure actual reward balance delta = the correctly calculated pending rewards
@@ -103,7 +103,6 @@ contract("Staker", async accounts => {
         let userNewRewardBalance = await rewardToken.balanceOf(accounts[1], { from: accounts[1] });
         let delta = userNewRewardBalance.sub(prevUserRewardTokenBalance);
         assertEqualWithMargin(delta, expectedPendingReward, contractRps.div(rpsMultiplierBN), "Wrong amount of rewards sent to user after claim()");
-        //assert.equal(delta.toString(), expectedPendingReward.toString(), "Wrong amount of rewards sent to user after claim()");
         prevUserRewardTokenBalance = userNewRewardBalance;
         // Check contract rewards balance 
         let contractNewRewardBalance = await rewardToken.balanceOf(staker.address, { from: accounts[1] });
@@ -161,7 +160,7 @@ contract("Staker", async accounts => {
 
 
     });
-    it("should calculate and distribute rewards correctly to multiple stakers", async () => {
+    it("should calculate and distribute rewards correctly to multiple stakers + skim functionality", async () => {
         const staker = await Staker.deployed();
         const depositTokenAddr = await staker.depositToken.call();
         const rewardTokenAddr = await staker.rewardToken.call();
@@ -181,10 +180,16 @@ contract("Staker", async accounts => {
         await rewardToken.approve(staker.address, rewardAmount, defaultOptions);
         await staker.addRewards(rewardAmount, days, defaultOptions);
 
+        // Transfer deposit token (LPtoken) from user straight to pool without using the stake mechanism.
+        // Will test that all rewards are calculated correctly (= without taking this deposit into account)
+        // And in the end owner will call skim to collect excess balance.
+        let depositAmount = web3.utils.toWei("10");
+        await depositToken.transfer(staker.address, depositAmount, { from: accounts[1] });
+        prevUser1DepositTokenBalance = await depositToken.balanceOf.call(accounts[1], { from: accounts[1] });
+
         let contractRps = await staker.rewardPerSecond.call(defaultOptions);
 
-        // User 1 stakes (from the start)
-        let depositAmount = web3.utils.toWei("10");
+        // User 1 stakes
         await depositToken.approve(staker.address, depositAmount, { from: accounts[1] });
         await staker.deposit(depositAmount, { from: accounts[1] });
         let user1StartingTime = await getTime();
@@ -218,6 +223,11 @@ contract("Staker", async accounts => {
         assertEqualWithMargin(newUser1RewardTokenBalance, prevUser1RewardTokenBalance.add(user1ExpectedReward), contractRps.div(rpsMultiplierBN),  "User1 hasn't received correct amount of rewards");
         assertEqualWithMargin(newUser2RewardTokenBalance, prevUser2RewardTokenBalance.add(user2ExpectedReward), contractRps.div(rpsMultiplierBN),  "User2 hasn't received correct amount of rewards");
         
+        // Owner calls skim() and collects excess balance
+        let prevOwnerDepositTokenBalance = await depositToken.balanceOf.call(accounts[0], { from: accounts[0] });
+        await staker.skim({from: accounts[0] });
+        let newOwnerDepositTokenBalance = await depositToken.balanceOf.call(accounts[0], { from: accounts[0] });
+        assert.equal(newOwnerDepositTokenBalance.toString(), prevOwnerDepositTokenBalance.add(new BN(depositAmount)).toString(), "Wrong owner balance after skim()")
     });
 
     it("should not let user withdraw more than staked", async () => {
@@ -248,6 +258,39 @@ contract("Staker", async accounts => {
         catch (error) {
             assert(error, "Expected an error but did not get one");
             assert(error.message.search("revert") >= 0, "Not reverted on too big withdraw");
+        }
+    });
+
+    it("should limit sensitive functions only to owner", async () => {
+        const staker = await Staker.deployed();
+        const depositTokenAddr = await staker.depositToken.call();
+        const rewardTokenAddr = await staker.rewardToken.call();
+
+        let rewardAmount = web3.utils.toWei("300");
+        let days = 30;
+
+        const rewardToken = await MockERC20.at(rewardTokenAddr);
+        const depositToken = await MockERC20.at(depositTokenAddr);
+
+        // Add staking rewards
+        
+
+        try {
+            await staker.addRewards(rewardAmount, days, {from: accounts[1]});
+            throw null;
+        }
+        catch (error) {
+            assert(error, "Expected an error but did not get one");
+            assert(error.message.search("Ownable") >= 0, "Not reverted on addRewards");
+        }
+
+        try {
+            await staker.skim( {from: accounts[1]});
+            throw null;
+        }
+        catch (error) {
+            assert(error, "Expected an error but did not get one");
+            assert(error.message.search("Ownable") >= 0, "Not reverted on skim");
         }
     });
 });

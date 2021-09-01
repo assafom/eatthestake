@@ -8,6 +8,25 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 
+/*
+
+
+    Staker contract for ETB Projects #2
+    ===================================
+
+    Based on Sushiswap MasterChefV2.
+    The basic idea is to keep an accumulating pool "share balance" (accumulatedRewardPerShare):
+    Every unit of this balance represents the proportionate reward of a single wei which is staked in the contract.
+    This balance is updated in updateRewards() (which is called in each deposit/withdraw/claim)
+        according to the time passed from the last update and in proportion to the total tokens staked in the pool.
+        Basically: accumulatedRewardPerShare = accumulatedRewardPerShare + (seconds passed from last update) * (rewards per second) / (total tokens staked)
+    We also save for each user an accumulation of how much he has already claimed so far.
+    And so to calculate a user's rewards, we basically just need to calculate:
+    userRewards = accumulatedRewardPerShare * (user's currently staked tokens) - (user's rewards already claimed) 
+    And updated the user's rewards already claimed accordingly.
+
+
+*/
 contract Staker is Ownable {
     using SafeMath for uint256;
 
@@ -16,21 +35,26 @@ contract Staker is Ownable {
         uint256 rewardsAlreadyConsidered;
     }
 
+    mapping (address => UserInfo) users;
+    
+    IERC20 public depositToken; // eg. PancakeSwap ETB LP token
+    IERC20 public rewardToken;  // eg. ETB
+
+    // We are not using depositToken.balanceOf in order to prevent DOS attacks (attacker can make the total tokens staked very large)
+    // and to add a skim() functionality with which the owner can collect tokens which were transferred outside the stake mechanism.
+    uint256 public totalStaked;
+
     uint256 public rewardPeriodEndTimestamp;
-    uint256 public rewardPerSecond; // multiplied by 1e7
+    uint256 public rewardPerSecond; // multiplied by 1e7, to make up for division by 24*60*60
 
     uint256 public lastRewardTimestamp;
-    uint256 public accumulatedRewardPerShare; // multiplied by 1e12
-
-    IERC20 public depositToken;
-    IERC20 public rewardToken;
-
-    mapping (address => UserInfo) users;
+    uint256 public accumulatedRewardPerShare; // multiplied by 1e12, same as MasterChef
 
     event AddRewards(uint256 amount, uint256 lengthInDays);
     event ClaimReward(address indexed user, uint256 amount);
     event Deposit(address indexed user, uint256 amount);
     event Withdraw(address indexed user, uint256 amount);
+    event Skim(uint256 amount);
     
 
     constructor(address _depositToken, address _rewardToken) {
@@ -38,29 +62,28 @@ contract Staker is Ownable {
         rewardToken = IERC20(_rewardToken);
     }
 
-    // User should have allowed transfer before.
+    // Owner should have approved ERC20 before.
     function addRewards(uint256 _rewardsAmount, uint256 _lengthInDays)
     external onlyOwner {
         require(block.timestamp > rewardPeriodEndTimestamp, "Staker: can't add rewards before period finished");
         updateRewards();
         rewardPeriodEndTimestamp = block.timestamp.add(_lengthInDays.mul(24*60*60));
         rewardPerSecond = _rewardsAmount.mul(1e7).div(_lengthInDays).div(24*60*60);
-        //lastRewardTimestamp = block.timestamp;
         require(rewardToken.transferFrom(msg.sender, address(this), _rewardsAmount), "Staker: transfer failed");
         emit AddRewards(_rewardsAmount, _lengthInDays);
     }
 
+    // Main function to keep a balance of the rewards.
+    // See top of file for description.
     function updateRewards()
     public {
         if (block.timestamp <= lastRewardTimestamp) {
             return;
         }
-        uint256 totalStaked = depositToken.balanceOf(address(this));
         if ((totalStaked == 0) || lastRewardTimestamp > rewardPeriodEndTimestamp) {
             lastRewardTimestamp = block.timestamp;
             return;
         }
-        //uint256 multiplier
         uint256 endingTime;
         if (block.timestamp > rewardPeriodEndTimestamp) {
             endingTime = rewardPeriodEndTimestamp;
@@ -76,9 +99,10 @@ contract Staker is Ownable {
         }
     }
 
-    // User should have allowed transfer before.
+    // User should have approved ERC20 before.
+    // Will also send rewards.
     function deposit(uint256 _amount)
-    public {
+    external {
         UserInfo storage user = users[msg.sender];
         updateRewards();
         // Send reward for previous deposits
@@ -87,27 +111,32 @@ contract Staker is Ownable {
             require(rewardToken.transfer(msg.sender, pending), "Staker: transfer failed");
             emit ClaimReward(msg.sender, pending);
         }
-        require(depositToken.transferFrom(msg.sender, address(this), _amount), "Staker: transferFrom failed");
         user.deposited = user.deposited.add(_amount);
+        totalStaked = totalStaked.add(_amount);
         user.rewardsAlreadyConsidered = user.deposited.mul(accumulatedRewardPerShare).div(1e12).div(1e7);
+        require(depositToken.transferFrom(msg.sender, address(this), _amount), "Staker: transferFrom failed");
         emit Deposit(msg.sender, _amount);
     }
     
 
+    // Will also send rewards.
     function withdraw(uint256 _amount)
-    public {
+    external {
         UserInfo storage user = users[msg.sender];
         require(user.deposited >= _amount, "Staker: balance not enough");
         updateRewards();
+        // Send reward for previous deposits
         uint256 pending = user.deposited.mul(accumulatedRewardPerShare).div(1e12).div(1e7).sub(user.rewardsAlreadyConsidered);
         require(rewardToken.transfer(msg.sender, pending), "Staker: reward transfer failed");
         emit ClaimReward(msg.sender, pending);
         user.deposited = user.deposited.sub(_amount);
+        totalStaked = totalStaked.sub(_amount);
         user.rewardsAlreadyConsidered = user.deposited.mul(accumulatedRewardPerShare).div(1e12).div(1e7);
         require(depositToken.transfer(msg.sender, _amount), "Staker: deposit withdrawal failed");
         emit Withdraw(msg.sender, _amount);
     }
 
+    // Will just send rewards.
     function claim()
     external {
         UserInfo storage user = users[msg.sender];
@@ -122,17 +151,23 @@ contract Staker is Ownable {
         
     }
 
-    function withdraw2(uint256 _amount)
-    public {
-        depositToken.transfer(msg.sender, _amount);
-        emit Withdraw(msg.sender, _amount);
+    // Will collect depositTokens (LP tokens) that were sent to the contract
+    //  Outside of the staking mechanism.
+    function skim()
+    external onlyOwner {
+        uint256 depositTokenBalance = depositToken.balanceOf(address(this));
+        if (depositTokenBalance > totalStaked) {
+            uint256 amount = depositTokenBalance.sub(totalStaked);
+            require(depositToken.transfer(msg.sender, amount), "Staker: transfer failed");
+            emit Skim(amount);
+        }
     }
+
 
     function pendingRewards(address _user)
     public view returns (uint256) {
         UserInfo storage user = users[_user];
         uint256 accumulated = accumulatedRewardPerShare;
-        uint256 totalStaked = depositToken.balanceOf(address(this));
         if (block.timestamp > lastRewardTimestamp && lastRewardTimestamp <= rewardPeriodEndTimestamp && totalStaked != 0) {
             uint256 endingTime;
             if (block.timestamp > rewardPeriodEndTimestamp) {
@@ -150,10 +185,10 @@ contract Staker is Ownable {
 
     function getFrontendView()
     external view returns (uint256 _rewardPerSecond, uint256 _secondsLeft, uint256 _deposited, uint256 _pending) {
-        if (block.timestamp <= rewardPeriodEndTimestamp) { // else, anyway defaults to 0
+        if (block.timestamp <= rewardPeriodEndTimestamp) {
             _secondsLeft = rewardPeriodEndTimestamp.sub(block.timestamp); 
             _rewardPerSecond = rewardPerSecond.div(1e7);
-        }
+        } // else, anyway these values will default to 0
         _deposited = users[msg.sender].deposited;
         _pending = pendingRewards(msg.sender);
     }
