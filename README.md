@@ -43,5 +43,5 @@ advancetime = new Promise((resolve,reject) => { web3.currentProvider.send({jsonr
 - In the truffle tests it is tricky to test for balances, as we are calculating based on seconds and sometimes there is 1-3 seconds of delay. [See here Gotacha#2](https://medium.com/fluidity/standing-the-time-of-test-b906fcc374a9) for explanation. To combat this, when testing time sensitive functions, I allow the actual result to be within 3 (monetary unit allocated per second) error of margin from the expected result.
 
 ## Misc
-- The contract is based upon SushiSwap's MasterChefV2.
+- The contract is based upon SushiSwap's MasterChef.
 - In the development network, the contract deploys 2 mock ERC20 contracts and mints tokens for the first Ganache accounts, for testing. The first account will be the owner who is allowed to add rewards, and the next 2 accounts can be used for staking and testing. These contracts (ERC20Factory and MockERC20) will not be deployed to networks other than local dev networks.

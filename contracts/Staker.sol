@@ -14,7 +14,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
     Staker contract for ETB Projects #2
     ===================================
 
-    Based on Sushiswap MasterChefV2.
+    Based on Sushiswap MasterChef.
     The basic idea is to keep an accumulating pool "share balance" (accumulatedRewardPerShare):
     Every unit of this balance represents the proportionate reward of a single wei which is staked in the contract.
     This balance is updated in updateRewards() (which is called in each deposit/withdraw/claim)
