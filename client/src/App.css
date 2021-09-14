@@ -214,3 +214,12 @@ button:focus , button:active {
 .input-button-container >.form-control:focus {
   box-shadow: 0px 0px 10px 0px rgb(0 0 0 / 50%);
 }
+
+.tooltip-inner {
+  background-color: #0F4949;
+  border-radius: 15px;
+}
+
+.tooltip-arrow::before {
+  border-right-color: #0F4949 !important;
+}

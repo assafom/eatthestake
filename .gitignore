@@ -3,3 +3,4 @@ client/src/contracts/Migrations.json
 client/src/contracts/
 rganache
 tconsole
+build/

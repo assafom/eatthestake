@@ -13,30 +13,25 @@ export default function AdminPanel() {
     const blockchainContext = useContext(BlockchainContext);
     const displayContext = useContext(DisplayContext);
     const { web3, accounts, stakerContract, rewardTokenContract } = blockchainContext;
-    const {userDetails, refreshUserDetails, onInputNumberChange, toast} = displayContext;
+    const {userDetails, refreshUserDetails, onInputNumberChange, isNonZeroNumber, toast} = displayContext;
 
     const [inputAdminRewards, setInputAdminRewards] = useState('');
     const [inputAdminDuration, setInputAdminDuration] = useState('');
 
     async function addRewards() {
-        if (userDetails["daysLeft"] != 0) {
+        if (userDetails["daysLeft"] !== 0.) {
             toast.info("Can't add rewards in middle of campaign. Please wait for campaign to finish.");
             return;
         }
-        if (inputAdminRewards == 0 || inputAdminDuration == 0) {
+        if (!(isNonZeroNumber(inputAdminRewards) && isNonZeroNumber(inputAdminDuration))) {
             toast.info('Please add missing input.');
             return;
         }
         if (parseFloat(inputAdminRewards) > parseFloat(userDetails["rewardTokenBalance"])) {
-        //if (new BN(inputAdminRewards).gt(new BN(userDetails["rewardTokenBalance"]))) {
-            console.log(typeof inputAdminRewards);
-            console.log(typeof userDetails["rewardTokenBalance"]);
-            console.log(inputAdminRewards > userDetails["rewardTokenBalance"]);
             toast.error("Not enough balance.");
             return;
         }
         toast.dismiss();
-        console.log(stakerContract.options.address);
         let amount = web3.utils.toWei(inputAdminRewards);
         let days = inputAdminDuration;
         try {

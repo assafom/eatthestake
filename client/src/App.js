@@ -120,7 +120,7 @@ function App() {
       && typeof rewardTokenContract !== 'undefined') {
         load();
       }
-  }, [web3, accounts, stakerContract, depositTokenContract, rewardTokenContract])
+  }, [web3, accounts, stakerContract, depositTokenContract, rewardTokenContract]) // eslint-disable-line react-hooks/exhaustive-deps
 
 
   async function refreshUserDetails() {
@@ -152,12 +152,16 @@ function App() {
     }
   }
 
+  function isNonZeroNumber(_input) {
+    return _input !== undefined && _input !== "" && parseFloat(_input) !== 0.0;
+  }
+
   const MainView = () => (
     <>
         <br/>
         <div style={{display: 'flex'}}>
           <UserPanel />
-          {(accounts && accounts[0].toLowerCase() == owner.toLowerCase())? <AdminPanel /> : undefined}
+          {(accounts && accounts[0].toLowerCase() === owner.toLowerCase())? <AdminPanel /> : undefined}
         </div>
     </>
   );
@@ -181,7 +185,7 @@ function App() {
   return (
     <div className="outerApp">
       <BlockchainContext.Provider value={{web3, accounts, stakerContract, rewardTokenContract, depositTokenContract}}>
-      <DisplayContext.Provider value={{userDetails, refreshUserDetails, onInputNumberChange, toast}}>
+      <DisplayContext.Provider value={{userDetails, refreshUserDetails, onInputNumberChange, isNonZeroNumber, toast}}>
         <NavBar />
         <div className="App">
           {isGlobalLoading? <LoadingView/> : <MainViewOrConnectView/> }
