@@ -74,9 +74,11 @@ contract Staker is Ownable {
     }
 
     // Main function to keep a balance of the rewards.
-    // See top of file for description.
+    // Is called before each user action (stake, unstake, claim).
+    // See top of file for high level description.
     function updateRewards()
     public {
+        // If no staking period active, or already updated rewards after staking ended, or nobody staked anything - nothing to do
         if (block.timestamp <= lastRewardTimestamp) {
             return;
         }
@@ -84,6 +86,8 @@ contract Staker is Ownable {
             lastRewardTimestamp = block.timestamp;
             return;
         }
+
+        // If staking period ended, calculate time delta based on the time the staking ended (and not after)
         uint256 endingTime;
         if (block.timestamp > rewardPeriodEndTimestamp) {
             endingTime = rewardPeriodEndTimestamp;
@@ -91,7 +95,10 @@ contract Staker is Ownable {
             endingTime = block.timestamp;
         }
         uint256 secondsSinceLastRewardUpdate = endingTime.sub(lastRewardTimestamp);
-        uint256 totalNewReward = secondsSinceLastRewardUpdate.mul(rewardPerSecond);
+        uint256 totalNewReward = secondsSinceLastRewardUpdate.mul(rewardPerSecond); // For everybody in the pool
+        // The next line will calculate the reward for each staked token in the pool.
+        //  So when a specific user will claim his rewards,
+        //  we will basically multiply this var by the amount the user staked.
         accumulatedRewardPerShare = accumulatedRewardPerShare.add(totalNewReward.mul(1e12).div(totalStaked));
         lastRewardTimestamp = block.timestamp;
         if (block.timestamp > rewardPeriodEndTimestamp) {
@@ -99,8 +106,8 @@ contract Staker is Ownable {
         }
     }
 
+    // Will deposit specified amount and also send rewards.
     // User should have approved ERC20 before.
-    // Will also send rewards.
     function deposit(uint256 _amount)
     external {
         UserInfo storage user = users[msg.sender];
@@ -119,7 +126,7 @@ contract Staker is Ownable {
     }
     
 
-    // Will also send rewards.
+    // Will withdraw the specified amount and also send rewards.
     function withdraw(uint256 _amount)
     external {
         UserInfo storage user = users[msg.sender];
@@ -163,7 +170,14 @@ contract Staker is Ownable {
         }
     }
 
+    /* 
+        ####################################################
+        ################## View functions ##################
+        ####################################################
 
+    */
+
+    // Return the user's pending rewards.
     function pendingRewards(address _user)
     public view returns (uint256) {
         UserInfo storage user = users[_user];
@@ -182,7 +196,7 @@ contract Staker is Ownable {
         return user.deposited.mul(accumulated).div(1e12).div(1e7).sub(user.rewardsAlreadyConsidered);
     }
 
-
+    // Returns misc details for the front end.
     function getFrontendView()
     external view returns (uint256 _rewardPerSecond, uint256 _secondsLeft, uint256 _deposited, uint256 _pending) {
         if (block.timestamp <= rewardPeriodEndTimestamp) {
