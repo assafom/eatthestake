@@ -1,8 +1,9 @@
 const path = require("path");
 require('dotenv').config();
 
-var HDWalletProvider = require("truffle-hdwallet-provider");
-//var devConfigs = require('./env-dev.json');
+const HDWalletProvider = require("@truffle/hdwallet-provider");
+// var HDWalletProvider = require("truffle-hdwallet-provider");
+
 
 module.exports = {
   // See <http://truffleframework.com/docs/advanced/configuration>
@@ -45,6 +46,5 @@ module.exports = {
     solc: {
       version: "0.7.6"
     }
-  }
-
+  },
 };

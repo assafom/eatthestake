@@ -71,6 +71,16 @@ https://info.honeyswap.org/#/pair/0x5140dcfab6933cca971c2d1edbf4175e97d5b120
 https://info.honeyswap.org/#/pair/0x4d9f71f0b50927b7ba1d528de690a15ac0f37265
 4. MDZA-WXDAI
 https://analytics-xdai.sushi.com/pairs/0xcd4f0d66262dafa6e786a132121e84aae4ffdf24
+## Audit
+Doc: https://mythx-cli.readthedocs.io/en/latest/
+
+```shell
+mkdir audit ; cd audit ; pip3 install mythx-cli
+```
+export MYTHX_API_KEY='xxxxxxxxxxxxx'
+
+## Testnets
+deposittoken adress on sokol testnet `0xa8366f25f4030013Dd364930dF6e9260Ac880c40`
 ## ToDo
 ### Fronted
 - Instead of enter amount manual add "click to max".
