@@ -2,6 +2,7 @@ const Staker = artifacts.require("./Staker.sol");
 const timeMachine = require('ganache-time-traveler');
 var ERC20Factory = artifacts.require("./ERC20Factory.sol");
 var MockERC20 = artifacts.require("./MockERC20.sol");
+require('dotenv').config()
 
 
 contract("Staker", async accounts => {

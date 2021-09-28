@@ -4,3 +4,4 @@ client/src/contracts/
 rganache
 tconsole
 build/
+.env*
