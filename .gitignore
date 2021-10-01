@@ -5,3 +5,4 @@ rganache
 tconsole
 build/
 .env*
+tmp/

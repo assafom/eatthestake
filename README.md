@@ -73,12 +73,21 @@ https://info.honeyswap.org/#/pair/0x4d9f71f0b50927b7ba1d528de690a15ac0f37265
 https://analytics-xdai.sushi.com/pairs/0xcd4f0d66262dafa6e786a132121e84aae4ffdf24
 ## Audit
 Doc: https://mythx-cli.readthedocs.io/en/latest/
-
+Audit file: [Audit file](audit/ce997d5316543b369ede443c.pdf)
 ```shell
 mkdir audit ; cd audit ; pip3 install mythx-cli
 ```
 export MYTHX_API_KEY='xxxxxxxxxxxxx'
-
+## Docker
+Backend
+```shell
+docker build . -t medooza-stake-backend
+```
+Client
+```shell
+cd client ; \
+docker build . -t medooza-stake-cliend
+```
 ## Testnets
 deposittoken adress on sokol testnet `0xa8366f25f4030013Dd364930dF6e9260Ac880c40`
 ## ToDo

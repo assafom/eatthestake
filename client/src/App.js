@@ -195,17 +195,17 @@ function App() {
         </div>
             <br></br>
             <br></br>
-        <div class="row">
-            <div class="col-sm px-md-5">
+        <div className="row">
+            <div className="col-sm px-md-5">
               <coingecko-coin-ticker-widget currency="usd" coin-id="medooza-ecosystem" locale="en">
               </coingecko-coin-ticker-widget>
             </div>
         </div>    
             <br></br>
             <br></br>
-        <div class="row">
-            <div class="col-sm px-md-5">
-           <iframe width="100%" height="350px" border="0" class="embed-responsive-item" src="https://info.honeyswap.org/token/0xbab3cbdcbcc578445480a79ed80269c50bb5b718#/token/0xbab3cbdcbcc578445480a79ed80269c50bb5b718" allowfullscreen></iframe>
+        <div className="row">
+            <div className="col-sm px-md-5">
+           <iframe width="100%" height="350px" border="0" className="embed-responsive-item" src="https://info.honeyswap.org/token/0xbab3cbdcbcc578445480a79ed80269c50bb5b718#/token/0xbab3cbdcbcc578445480a79ed80269c50bb5b718" allowFullScreen></iframe>
             </div>  
         </div>
 
