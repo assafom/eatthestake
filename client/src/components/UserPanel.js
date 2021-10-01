@@ -165,10 +165,7 @@ export default function UserPanel() {
                     <Button onClick={claim} >Claim rewards</Button>
                 </div>
                 <br/>
-                <div>
-                <script src="https://widgets.coingecko.com/coingecko-coin-ticker-widget.js"></script>
-<coingecko-coin-ticker-widget currency="usd" coin-id="medooza-ecosystem" locale="en"></coingecko-coin-ticker-widget>
-                </div>
+
                 </Container>
 
         </>

@@ -172,6 +172,8 @@ function App() {
     </>
   )
 
+
+
   const LoadingView = () => (
     <>
       <br/>
@@ -189,7 +191,24 @@ function App() {
         <NavBar />
         <div className="App">
           {isGlobalLoading? <LoadingView/> : <MainViewOrConnectView/> }
+
         </div>
+            <br></br>
+            <br></br>
+        <div class="row">
+            <div class="col-sm px-md-5">
+              <coingecko-coin-ticker-widget currency="usd" coin-id="medooza-ecosystem" locale="en">
+              </coingecko-coin-ticker-widget>
+            </div>
+        </div>    
+            <br></br>
+            <br></br>
+        <div class="row">
+            <div class="col-sm px-md-5">
+           <iframe width="100%" height="350px" border="0" class="embed-responsive-item" src="https://info.honeyswap.org/token/0xbab3cbdcbcc578445480a79ed80269c50bb5b718#/token/0xbab3cbdcbcc578445480a79ed80269c50bb5b718" allowfullscreen></iframe>
+            </div>  
+        </div>
+
       </DisplayContext.Provider>
       </BlockchainContext.Provider>
       <ToastContainer
