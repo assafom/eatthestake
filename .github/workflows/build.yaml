@@ -17,11 +17,13 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       # Install backend
-      - run: CI=true npm install -g ganache-cli truffle web3@1.6.0
+      - run: npm prune
+      - run: CI=true npm install -g ganache-cli truffle web3
       - run: ganache-cli -p 8545 > /dev/null &
       - run: CI=true npm  install
       # Fixing  problem on Node v14.15.3 by installing pify
       - run: npm install --save-dev pify
+      - run: npm list
       #- run: truffle test
       # This one will produce all required artifacts in "client/src/contract" directory.
       # and will be used latter in the "ci-fronted" section when we also testing fronted build.
