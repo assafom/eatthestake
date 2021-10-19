@@ -8,7 +8,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [14.x, 15.x]
+        node-version: [14.x]
     steps:
       - name: SCM
         uses: actions/checkout@v2
@@ -17,11 +17,11 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       # Install backend
-      - run: CI=true npm install -g ganache-cli truffle web3
+      - run: CI=true npm install -g ganache-cli truffle 
       - run: ganache-cli -p 8545 > /dev/null &
       - run: CI=true npm  install
       # Fixing  problem on Node v14.15.3 by installing pify
-      - run: npm install --save-dev pify
+      - run: npm install --save-dev pify web3
       - run: npm prune
       - run: npm install
       - run: npm list
@@ -39,7 +39,7 @@ jobs:
         working-directory: client/     
     strategy:
       matrix:
-        node-version: [14.x, 15.x]
+        node-version: [14.x]
     steps:
       - name: SCM
         uses: actions/checkout@v2
