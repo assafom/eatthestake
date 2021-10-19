@@ -21,7 +21,7 @@ jobs:
       - run: ganache-cli -p 8545 > /dev/null &
       - run: CI=true npm  install
       # Fixing  problem on Node v14.15.3 by installing pify
-      - run: npm install --save-dev pify web3
+      - run: npm install --save-dev pify ethereum/web3.js
       #- run: truffle test
       # This one will produce all required artifacts in "client/src/contract" directory.
       # and will be used latter in the "ci-fronted" section when we also testing fronted build.
