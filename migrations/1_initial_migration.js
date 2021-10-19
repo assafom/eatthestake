@@ -1,7 +1,7 @@
 var Staker = artifacts.require("./Staker.sol");
 var ERC20Factory = artifacts.require("./ERC20Factory.sol");
 var MockERC20 = artifacts.require("./MockERC20.sol");
-var Web3=require('Web3');
+var Web3 = require('web3');
 
 module.exports = async function(deployer, network, accounts) {
   // BSC addresses
