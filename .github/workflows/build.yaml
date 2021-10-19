@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   ci-backend:
-    
+
     strategy:
       matrix:
         os: [ ubuntu-latest, windows-latest ]
@@ -17,9 +17,9 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }} # install node.js
       # Install backend
-      - run: CI=true npm install -g ganache-cli truffle 
+      - run: npm install -g ganache-cli truffle 
       - run: ganache-cli -p 8545 > /dev/null &
-      - run: CI=true npm  install
+      - run: true npm  install
       # Fixing  problem on Node v14.15.3 by installing pify
       - run: npm install --save-dev pify 
       - run: npm list
