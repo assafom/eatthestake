@@ -9,7 +9,7 @@ jobs:
       matrix:
         os: [ ubuntu-latest ]
         node-version: [ 12, 14, 16 ]
-    name: Test(Node ${{ matrix.node-version }} on ${{ matrix.os }})
+    name: Test deployment (Node ${{ matrix.node-version }} on ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
@@ -38,7 +38,7 @@ jobs:
       matrix:
         os: [ ubuntu-latest ]
         node-version: [ 12, 14, 16 ]
-    name: Test(Node ${{ matrix.node-version }} on ${{ matrix.os }})
+    name: Test Client (Node ${{ matrix.node-version }} on ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
@@ -48,4 +48,4 @@ jobs:
       # Install and test Fronted
       - run: npm  install
       # - run: npm run build --if-present
-      - run: npm test --coverage --watchAll
+      - run: npm test -- --coverage --watchAll
