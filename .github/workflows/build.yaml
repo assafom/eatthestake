@@ -19,7 +19,7 @@ jobs:
       # Install backend
       - run: npm install -g ganache-cli truffle 
       - run: ganache-cli -p 8545 > /dev/null &
-      - run: true npm  install
+      - run: npm  install
       # Fixing  problem on Node v14.15.3 by installing pify
       - run: npm install --save-dev pify 
       - run: npm list
