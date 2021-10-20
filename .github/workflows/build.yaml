@@ -48,4 +48,4 @@ jobs:
       # Install and test Fronted
       - run: npm  install
       # - run: npm run build --if-present
-      - run: CI=true react-scripts test --watch=all
+      - run: CI=true npm test --watch=all
