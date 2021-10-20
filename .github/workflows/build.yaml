@@ -46,6 +46,6 @@ jobs:
           node-version: ${{ matrix.node-version }} # install node.js
       # Install and test Fronted
       - run: npm  install
-      - run: ls -ltrh
+      - run: ls -ltrh src
       # Basic coverage
       - run: CI=true npm test -- --coverage --watch=all
