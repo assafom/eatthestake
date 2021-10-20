@@ -51,3 +51,11 @@ advancetime = new Promise((resolve,reject) => { web3.currentProvider.send({jsonr
 ## Audit
 Doc: https://mythx-cli.readthedocs.io/en/latest/
 Audit file: [Audit file](audit/ce997d5316543b369ede443c.pdf)
+
+## CI
+Ci script located at `.github/workflows/build.yaml`
+The script test whole project `backend` and `client` on different node versions.   
+Test deployment - installing necessary packages including `ganache-cli` and deploy the project to `development` local ganache network while the contract artifact's 
+stored to `client/src/contracts` directory.
+If that succeeds, basic client coverage tests  is triggered.
+
