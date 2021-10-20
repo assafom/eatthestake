@@ -22,7 +22,6 @@ jobs:
       - run: npm  install
       # Fixing  problem on Node v14.15.3 by installing pify
       - run: npm install --save-dev pify 
-      - run: npm list
       #- run: truffle test
       # This one will produce all required artifacts in "client/src/contract" directory.
       # and will be used latter in the "ci-fronted" section when we also testing fronted build.
@@ -48,4 +47,4 @@ jobs:
       # Install and test Fronted
       - run: npm  install
       # - run: npm run build --if-present
-      - run: CI=true npm test --watch=all
+      - run: CI=true npm test --coverage --watch=all
