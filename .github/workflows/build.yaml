@@ -8,7 +8,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest ]
-        node-version: [ 14, 16 ]
+        node-version: [ 12, 14, 16 ]
     name: Test deployment (Node ${{ matrix.node-version }} on ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     steps:
@@ -36,7 +36,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest ] 
-        node-version: [ 14, 16 ]
+        node-version: [ 12, 14, 16 ]
     name: Test Client (Node ${{ matrix.node-version }} on ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     steps:
@@ -46,6 +46,5 @@ jobs:
           node-version: ${{ matrix.node-version }} # install node.js
       # Install and test Fronted
       - run: npm  install
-      - run: ls -ltrh src
       # Basic coverage
       - run: CI=true npm test -- --coverage --watch=all
