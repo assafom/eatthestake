@@ -1,3 +1,5 @@
+[![ci](https://https://github.com/assafom/eatthestake/actions/workflows/build.yaml/badge.svg)](https://https://github.com/assafom/eatthestake/actions/workflows/build.yaml)
+
 # Eat The Stake
 Staking DApp for [Eat The Blocks Projects #2](https://github.com/jklepatch/eattheblocks/tree/master/etb-projects/project2-staking).
 
@@ -51,3 +53,40 @@ advancetime = new Promise((resolve,reject) => { web3.currentProvider.send({jsonr
 ## Audit
 Doc: https://mythx-cli.readthedocs.io/en/latest/
 Audit file: [Audit file](audit/ce997d5316543b369ede443c.pdf)
+
+## CI
+Ci script located at `.github/workflows/build.yaml`
+The script test whole project `backend` and `client` on different node versions.   
+Test deployment - installing necessary packages including `ganache-cli` and deploy the project to `development` local ganache network while the contract artifact's 
+stored to `client/src/contracts` directory.
+If that succeeds, basic client coverage tests  is triggered.
+```
+
+ PASS  src/App.test.js (7.609s)
+  √ renders without crashing (89ms)
+
+--------------------------|----------|----------|----------|----------|-------------------|
+File                      |  % Stmts | % Branch |  % Funcs |  % Lines | Uncovered Line #s |
+--------------------------|----------|----------|----------|----------|-------------------|
+All files                 |    10.53 |     3.77 |    12.77 |    10.53 |                   |
+ src                      |       16 |     4.41 |    17.24 |       16 |                   |
+  App.js                  |    28.57 |       10 |    38.46 |    28.57 |... 51,156,160,170 |
+  getWeb3.js              |        0 |        0 |        0 |        0 |... 23,27,30,31,32 |
+  index.js                |        0 |      100 |      100 |        0 |              7,12 |
+  serviceWorker.js        |        0 |        0 |        0 |        0 |... 23,130,131,132 |
+ src/components           |     4.44 |     3.33 |     6.25 |     4.44 |                   |
+  AdminPanel.js           |        0 |        0 |        0 |        0 |... 44,47,50,62,68 |
+  NavBar.js               |       80 |    16.67 |       50 |       80 |                11 |
+  UserPanel.js            |        0 |        0 |        0 |        0 |... 13,119,134,150 |
+ src/components/UserPanel |        0 |        0 |        0 |        0 |                   |
+  TimeLeftField.js        |        0 |        0 |        0 |        0 |... 19,20,21,22,25 |
+ src/context              |        0 |        0 |        0 |        0 |                   |
+  BlockchainContext.js    |        0 |        0 |        0 |        0 |                   |
+  DisplayContext.js       |        0 |        0 |        0 |        0 |                   |
+--------------------------|----------|----------|----------|----------|-------------------|
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Snapshots:   0 total
+Time:        12.81s
+Ran all test suites.
+```

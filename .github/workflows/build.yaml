@@ -1,0 +1,50 @@
+name: ci
+
+on: [push, pull_request]
+
+jobs:
+  ci-backend:
+
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+        node-version: [ 12, 14, 16 ]
+    name: Test deployment (Node ${{ matrix.node-version }} on ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }} # install node.js
+      # Install backend
+      - run: npm install -g ganache-cli truffle 
+      - run: ganache-cli -p 8545 > /dev/null &
+      - run: npm  install
+      # Fixing  problem on Node v14.15.3 by installing pify
+      - run: npm install --save-dev pify 
+      #- run: truffle test
+      # This one will produce all required artifacts in "client/src/contract" directory.
+      # and will be used latter in the "ci-fronted" section when we also testing fronted build.
+      - run: truffle migrate --network development --reset
+      
+  ci-fronted:
+    # Triggered only ci-fronted was success
+    needs: ci-backend
+    defaults:
+      run:
+        working-directory: client/     
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ] 
+        node-version: [ 12, 14, 16 ]
+    name: Test Client (Node ${{ matrix.node-version }} on ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }} # install node.js
+      # Install and test Fronted
+      - run: npm  install
+      # Basic coverage
+      - run: CI=true npm test -- --coverage --watch=all
